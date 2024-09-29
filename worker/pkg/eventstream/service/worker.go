@@ -22,7 +22,7 @@ func KafkaWorker(configMap *kafka.ConfigMap) error {
 	for {
 		msg, err := consumer.ReadMessage(-1)
 		if err != nil {
-			log.Printf("ERROR: %v\n", err)
+			log.Printf("Error to trying get kafka information: %v\n", err)
 		}
 		json.Unmarshal(msg.Value, &kafkaData)
 		log.Printf("message received: %s\n", msg.Value)
