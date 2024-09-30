@@ -40,9 +40,39 @@ func (user *UserRepository) InsertUser(data userModel.User) error {
 		return err
 	}
 	if i != 1 {
-		return errors.New("1 row was expected to be affect")
+		return validation.ErrRowsAffected
 	}
 	log.Println("user inserted success")
+	return nil
+}
+
+func (user *UserRepository) CreatePreference(data userModel.User) error {
+	var userData userModel.User
+
+	query := `SELECT id FROM users WHERE username=$1;`
+	err := user.DB.QueryRow(query, data.Username).Scan(&userData.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return validation.ErrObteinData
+		}
+		log.Println("Error querying user ID:", err)
+		return err
+	}
+
+	result, err := user.DB.Exec(`INSERT INTO preference(user_id) VALUES ($1);`, userData.ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	i, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if i != 1 {
+		return errors.New("1 row was expected to be affect")
+	}
+	log.Println("preference create success")
 	return nil
 }
 
@@ -51,23 +81,17 @@ func (user *UserRepository) GetUser(data userModel.User) (userModel.User, error)
 
 	query := `SELECT id, username, password
 	FROM users WHERE username=$1;`
-	rows, err := user.DB.Query(query, data.Username)
+	err := user.DB.QueryRow(query, data.Username).Scan(
+		&userData.ID,
+		&userData.Username,
+		&userData.Password,
+	)
 	if err != nil {
-		log.Println(err)
-		return userData, err
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err := rows.Scan(
-			&userData.ID,
-			&userData.Username,
-			&userData.Password,
-		); err != nil {
-			return userData, err
+		if err == sql.ErrNoRows {
+			return userData, validation.ErrIncorrectCredentials
 		}
-	} else {
-		return userData, validation.ErrIncorrectCredentials
+		log.Println("Error querying for user:", err)
+		return userData, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(data.Password))
@@ -76,4 +100,22 @@ func (user *UserRepository) GetUser(data userModel.User) (userModel.User, error)
 	}
 
 	return userData, nil
+}
+
+func (user *UserRepository) GetPreference(user_id string) (string, error) {
+	var preference userModel.Preference
+
+	query := `SELECT id
+	FROM preference WHERE user_id=$1;`
+	err := user.DB.QueryRow(query, user_id).Scan(
+		&preference.ID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", validation.ErrIncorrectCredentials
+		}
+		log.Println("Error querying for user:", err)
+		return "", err
+	}
+	return preference.ID, nil
 }

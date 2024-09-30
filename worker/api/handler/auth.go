@@ -75,6 +75,15 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
+	err = user.CreatePreference(body)
+	if err != nil {
+		response := response.ErrorResponse{Error: "Internal server error"}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	response := map[string]string{
 		"first_name": body.FirstName,

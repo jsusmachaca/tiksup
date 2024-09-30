@@ -13,7 +13,7 @@ import (
 	"github.com/jsusmachaca/tiksup/api/handler"
 	"github.com/jsusmachaca/tiksup/internal/config"
 	"github.com/jsusmachaca/tiksup/internal/database"
-	"github.com/jsusmachaca/tiksup/pkg/eventstream/service"
+	kafkaService "github.com/jsusmachaca/tiksup/pkg/eventstream/service"
 )
 
 // var collection *mongo.Collection
@@ -47,7 +47,7 @@ func init() {
 }
 
 func main() {
-	go service.KafkaWorker(&configMap)
+	go kafkaService.KafkaWorker(&configMap, db)
 
 	mux := http.NewServeMux()
 	route(mux, db)

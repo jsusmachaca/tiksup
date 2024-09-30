@@ -1,16 +1,20 @@
 package service
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/jsusmachaca/tiksup/internal/config"
 	modelKafka "github.com/jsusmachaca/tiksup/pkg/eventstream/model"
+	"github.com/jsusmachaca/tiksup/pkg/eventstream/repository"
+	movieService "github.com/jsusmachaca/tiksup/pkg/movie/service"
 )
 
-func KafkaWorker(configMap *kafka.ConfigMap) error {
+func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB) error {
 	var kafkaData modelKafka.KafkaData
+	kafaDB := repository.KafkaRepository{DB: db}
 
 	consumer, err := config.KafKaConsumer(configMap)
 	if err != nil {
@@ -26,6 +30,12 @@ func KafkaWorker(configMap *kafka.ConfigMap) error {
 		}
 		json.Unmarshal(msg.Value, &kafkaData)
 		log.Printf("message received: %s\n", msg.Value)
-		log.Println("message received: ", kafkaData.Preferences)
+
+		if err := kafaDB.UpdateUserInfo(kafkaData); err != nil {
+			log.Printf("Error to insert kafka information: %v\n", err)
+		}
+		if kafkaData.Next {
+			go movieService.MovieWorker()
+		}
 	}
 }

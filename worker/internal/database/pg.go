@@ -52,46 +52,28 @@ func PGMigrate(db *sql.DB) error {
 		UNIQUE(user_id)
 	);
 
-	CREATE TABLE IF NOT EXISTS genre (
-		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-		name VARCHAR(100),
-		UNIQUE(name)
-	);
-
 	CREATE TABLE IF NOT EXISTS genre_score (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
-		genre_id uuid REFERENCES genre(id),
+		genre VARCHAR,
 		score DECIMAL(5, 2),
-		UNIQUE(preference_id, genre_id)
-	);
-
-	CREATE TABLE IF NOT EXISTS protagonist (
-		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-		name VARCHAR(100),
-		UNIQUE(name)
+		UNIQUE(preference_id, genre)
 	);
 
 	CREATE TABLE IF NOT EXISTS protagonist_score (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
-		protagonist_id uuid REFERENCES protagonist(id),
+		protagonist VARCHAR,
 		score DECIMAL(5, 2),
-		UNIQUE(preference_id, protagonist_id)
-	);
-
-	CREATE TABLE IF NOT EXISTS director (
-		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-		name VARCHAR(100),
-		UNIQUE(name)
+		UNIQUE(preference_id, protagonist)
 	);
 
 	CREATE TABLE IF NOT EXISTS director_score (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
-		director_id uuid REFERENCES director(id),
+		director VARCHAR,
 		score DECIMAL(5, 2),
-		UNIQUE(preference_id, director_id)
+		UNIQUE(preference_id, director)
 	);
 
 	CREATE TABLE IF NOT EXISTS history (
