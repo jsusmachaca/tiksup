@@ -1,14 +1,34 @@
 const { preferences } = require('joi');
 const { producer } = require('../config/kafka');
 const { streamDataSchema } = require('../schemas/StreamDataSchema');
+const { validateToken } = require('../config/jwt');
 
 const postUserMovieData = async (req, res) => {
-  const { user_id, video_id, watching_time, watching_repeat, data } = req.body;
+  const { video_id, watching_time, watching_repeat, data } = req.body;
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') 
+                ? authHeader.split(' ')[1] 
+                : null;
 
-  const { error } = streamDataSchema.validate({ user_id, video_id, watching_time, watching_repeat, data });
+  if (!token) {
+    return res.status(401).json({ error: 'Token no proporcionado' });
+  }
+
+  const decodedToken = validateToken(token)
+  if (decodedToken === null) return res.status(401).json({ error: 'Token no valido' });
+
+  const { error } = streamDataSchema.validate({ 
+    user_id: decodedToken.user_id,
+    video_id, 
+    watching_time, 
+    watching_repeat, 
+    data 
+  });
   
   if (error) {
-    return res.status(400).send(`Error de validación: ${error.details[0].message}`);
+    return res.status(400).json({ 
+      serror: error.details[0].message.replace(/"/g, '') 
+    });
   }
 
   let preferences = {
@@ -47,7 +67,7 @@ const postUserMovieData = async (req, res) => {
 
   try {
     const mensajeJson = {
-      user_id,
+      user_id: decodedToken.user_id,
       video_id,
       watching_time,
       watching_repeat,

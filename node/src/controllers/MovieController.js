@@ -11,11 +11,14 @@ const getMovies= async(req, res) => {
     return res.status(401).send('Token no proporcionado');
   }
 
+  const decodedToken = validateToken(token)
+  if (decodedToken === null) return res.status(401).json({ error: 'Token no valido' });
+
   try{
     const endpointURL = `${process.env.WORKER_URL}/movies`;
 
     const request = {
-        token : token
+        token : decodedToken
     };
 
     const response = await axios.post(endpointURL, request);

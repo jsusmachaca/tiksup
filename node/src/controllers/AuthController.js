@@ -32,7 +32,9 @@ const loginUser = async (req, res) => {
   const { error } = loginUserSchema.validate({ username, password });
 
   if (error) {
-    return res.status(400).send(`Error de validación: ${error.details[0].message}`);
+    return res.status(400).json({ 
+      serror: error.details[0].message.replace(/"/g, '') 
+    });
   }
   try {
     const endpointURL = `${process.env.WORKER_URL}/api/login`;
