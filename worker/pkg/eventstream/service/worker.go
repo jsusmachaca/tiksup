@@ -26,5 +26,6 @@ func KafkaWorker(configMap *kafka.ConfigMap) error {
 		}
 		json.Unmarshal(msg.Value, &kafkaData)
 		log.Printf("message received: %s\n", msg.Value)
+		log.Println("message received: ", kafkaData.Preferences)
 	}
 }

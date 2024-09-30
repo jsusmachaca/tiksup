@@ -62,22 +62,22 @@ func PGMigrate(db *sql.DB) error {
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
 		genre_id uuid REFERENCES genre(id),
-		score INTEGER,
+		score DECIMAL(5, 2),
 		UNIQUE(preference_id, genre_id)
 	);
 
-	CREATE TABLE IF NOT EXISTS actor (
+	CREATE TABLE IF NOT EXISTS protagonist (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		name VARCHAR(100),
 		UNIQUE(name)
 	);
 
-	CREATE TABLE IF NOT EXISTS actor_score (
+	CREATE TABLE IF NOT EXISTS protagonist_score (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
-		actor_id uuid REFERENCES actor(id),
-		score INTEGER,
-		UNIQUE(preference_id, actor_id)
+		protagonist_id uuid REFERENCES protagonist(id),
+		score DECIMAL(5, 2),
+		UNIQUE(preference_id, protagonist_id)
 	);
 
 	CREATE TABLE IF NOT EXISTS director (
@@ -90,7 +90,7 @@ func PGMigrate(db *sql.DB) error {
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
 		director_id uuid REFERENCES director(id),
-		score INTEGER,
+		score DECIMAL(5, 2),
 		UNIQUE(preference_id, director_id)
 	);
 

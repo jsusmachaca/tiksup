@@ -1,33 +1,31 @@
 package model
 
 type KafkaData struct {
-	UserId         string      `json:"user_id"`
-	VideoId        string      `json:"vide_id"`
-	WatchingTime   string      `json:"waching_time"`
-	WatchingRepeat string      `json:"waching_repeat"`
-	Preferences    Preferences `json:"preferences"`
-	Next           bool        `json:"next"`
+	UserId      string      `json:"user_id"`
+	VideoId     string      `json:"video_id"`
+	Preferences Preferences `json:"preferences"`
+	Next        bool        `json:"next"`
 }
 
 type Preferences struct {
-	GenreScores   []GenreScores    `json:"genre_scores"`
-	Actorscores   []ActorScores    `json:"actor_scores"`
-	Directorcores []DirectorScores `json:"director_scores"`
+	GenreScore       []GenreScore     `json:"genre_score"`
+	ProtagonistScore ProtagonistScore `json:"protagonist_score"`
+	DirectorScore    DirectorScore    `json:"director_score"`
 }
 
-type GenreScores struct {
-	Name  string `json:"name"`
-	Score int    `json:"score"`
+type GenreScore struct {
+	Name  string  `json:"name"`
+	Score float64 `json:"score"`
 }
 
-type ActorScores struct {
-	Name  string `json:"name"`
-	Score int    `json:"score"`
+type ProtagonistScore struct {
+	Name  string  `json:"name"`
+	Score float64 `json:"score"`
 }
 
-type DirectorScores struct {
-	Name  string `json:"name"`
-	Score int    `json:"score"`
+type DirectorScore struct {
+	Name  string  `json:"name"`
+	Score float64 `json:"score"`
 }
 
 /*
@@ -53,36 +51,14 @@ Model
 	    },
             ...
         ],
-        "actors_scores": [
-             {
+        "actors_scores": {
 		"name": "Leo DiCaprio",
 		"score": 1
-	     },
-             {
-		"name": "Brad Pitt",
-		"score": 6
-	     },
-             {
-		"name": "Angelina Jolie",
-		"score": 4
-	     },
-		...
-        ],
-        "director_scores": [
-             {
-		"name": "Martin Scorsese",
-		"score": 4
-	     },
-             {
+	},
+        "director_scores": {
 		"name": "Cuentin Tarantino",
 		"score": 4
-	     },
-             {
-		"name": "Guillermo Del Toro",
-		"score": 4
-	     },
-	     ...
-        ]
+	}
     },
     "next": false
 }
