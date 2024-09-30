@@ -35,7 +35,7 @@ func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB) error {
 			log.Printf("Error to insert kafka information: %v\n", err)
 		}
 		if kafkaData.Next {
-			go movieService.MovieWorker()
+			go movieService.MovieWorker(db, kafkaData)
 		}
 	}
 }

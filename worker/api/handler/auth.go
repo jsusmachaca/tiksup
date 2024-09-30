@@ -8,14 +8,14 @@ import (
 	"github.com/jsusmachaca/tiksup/api/response"
 	"github.com/jsusmachaca/tiksup/internal/util"
 	modelUser "github.com/jsusmachaca/tiksup/pkg/auth/model"
-	"github.com/jsusmachaca/tiksup/pkg/auth/repository"
+	userRepository "github.com/jsusmachaca/tiksup/pkg/auth/repository"
 	"github.com/jsusmachaca/tiksup/pkg/auth/validation"
 )
 
 func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer r.Body.Close()
 
-	user := repository.UserRepository{DB: db}
+	user := userRepository.UserRepository{DB: db}
 
 	var body modelUser.User
 
@@ -54,7 +54,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer r.Body.Close()
 
-	user := repository.UserRepository{DB: db}
+	user := userRepository.UserRepository{DB: db}
 
 	var body modelUser.User
 

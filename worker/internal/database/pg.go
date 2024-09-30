@@ -78,9 +78,9 @@ func PGMigrate(db *sql.DB) error {
 
 	CREATE TABLE IF NOT EXISTS history (
 		user_id uuid REFERENCES users(id) ON DELETE CASCADE,
-		video_id VARCHAR,
+		movie_id VARCHAR,
 		watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (user_id, video_id)
+		PRIMARY KEY (user_id, movie_id)
 	);
 
 	COMMIT;`

@@ -27,7 +27,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 
 	defer func() {
 		if err != nil {
-			log.Println("Transaction rolled back:", err)
+			log.Println("Kafka transaction rolled back:", err)
 			tx.Rollback()
 		} else {
 			err = tx.Commit()
@@ -98,9 +98,9 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	}
 	log.Println("Updated director success")
 
-	history := `INSERT INTO history (user_id, video_id) 
-		VALUES ($1, $2);
-		ON CONFLICT (user_id, name)
+	history := `INSERT INTO history (user_id, movie_id) 
+		VALUES ($1, $2)
+		ON CONFLICT (user_id, movie_id)
 		DO NOTHING;`
 	stmtHistory, err := tx.Prepare(history)
 	if err != nil {
@@ -108,7 +108,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	}
 	defer stmtHistory.Close()
 
-	_, err = stmtHistory.Exec(data.UserID, data.VideoID)
+	_, err = stmtHistory.Exec(data.UserID, data.MovieID)
 	if err != nil {
 		log.Println(err)
 		return err

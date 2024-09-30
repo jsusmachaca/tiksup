@@ -119,7 +119,3 @@ func (user *UserRepository) GetPreferenceID(user_id string) (string, error) {
 	}
 	return preference.ID, nil
 }
-
-func (user *UserRepository) GetPreferences(user_id string) {
-
-}
