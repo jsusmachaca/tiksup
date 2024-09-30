@@ -1,6 +1,7 @@
 const { movieClient } = require('../services/GrpcService');
+const axios = require('axios');
 
-const getMovies= (req, res) => {
+const getMovies= async(req, res) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.startsWith('Bearer ') 
                 ? authHeader.split(' ')[1] 
@@ -10,12 +11,20 @@ const getMovies= (req, res) => {
     return res.status(401).send('Token no proporcionado');
   }
 
-  movieClient.GetMoviesByToken({ token }, (err, response) => {
-    if (err) {
-      return res.status(500).send('Error en la petición gRPC: ' + err.message);
-    }
-    res.send(response.movies);
-  });
+  try{
+    const endpointURL = `${process.env.WORKER_URL}/movies`;
+
+    const request = {
+        token : token
+    };
+
+    const response = await axios.post(endpointURL, request);
+    
+    res.send(response.data);
+
+  }catch(err){
+    res.status(500).send('Error: ' + err.message);
+  }
 };
 
 module.exports = { getMovies };

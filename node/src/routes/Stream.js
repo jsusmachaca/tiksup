@@ -1,5 +1,5 @@
 const express = require('express');
-const { postUserMovieData } = require('../controllers/UserController');
+const { postUserMovieData } = require('../controllers/StreamController');
 
 const router = express.Router();
 
