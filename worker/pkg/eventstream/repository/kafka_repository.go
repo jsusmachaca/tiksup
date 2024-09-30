@@ -35,11 +35,10 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	}()
 
 	queryGenre := `INSERT INTO genre_score 
-		(preference_id, genre, score) 
+		(preference_id, name, score) 
 		VALUES ($1, $2, $3)
-		ON CONFLICT (preference_id, genre)
-		DO UPDATE SET score = EXCLUDED.score;
-		`
+		ON CONFLICT (preference_id, name)
+		DO UPDATE SET score = EXCLUDED.score;`
 	stmtGenre, err := tx.Prepare(queryGenre)
 	if err != nil {
 		return err
@@ -56,11 +55,10 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	}
 
 	queryProtagonist := `INSERT INTO protagonist_score 
-			(preference_id, protagonist, score) 
+			(preference_id, name, score) 
 			VALUES ($1, $2, $3)
-			ON CONFLICT (preference_id, protagonist)
-			DO UPDATE SET score = EXCLUDED.score;
-			`
+			ON CONFLICT (preference_id, name)
+			DO UPDATE SET score = EXCLUDED.score;`
 	stmtProtagonist, err := tx.Prepare(queryProtagonist)
 	if err != nil {
 		return err
@@ -79,11 +77,10 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	log.Println("Updated protagonist success")
 
 	queryDirector := `INSERT INTO director_score 
-			(preference_id, director, score) 
+			(preference_id, name, score) 
 			VALUES ($1, $2, $3)
-			ON CONFLICT (preference_id, director)
-			DO UPDATE SET score = EXCLUDED.score;
-		`
+			ON CONFLICT (preference_id, name)
+			DO UPDATE SET score = EXCLUDED.score;`
 	stmtDirector, err := tx.Prepare(queryDirector)
 	if err != nil {
 		return err
@@ -102,7 +99,9 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	log.Println("Updated director success")
 
 	history := `INSERT INTO history (user_id, video_id) 
-		VALUES ($1, $2);`
+		VALUES ($1, $2);
+		ON CONFLICT (user_id, name)
+		DO NOTHING;`
 	stmtHistory, err := tx.Prepare(history)
 	if err != nil {
 		return err

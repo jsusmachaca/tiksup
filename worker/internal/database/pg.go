@@ -55,25 +55,25 @@ func PGMigrate(db *sql.DB) error {
 	CREATE TABLE IF NOT EXISTS genre_score (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
-		genre VARCHAR,
+		name VARCHAR,
 		score DECIMAL(5, 2),
-		UNIQUE(preference_id, genre)
+		UNIQUE(preference_id, name)
 	);
 
 	CREATE TABLE IF NOT EXISTS protagonist_score (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
-		protagonist VARCHAR,
+		name VARCHAR,
 		score DECIMAL(5, 2),
-		UNIQUE(preference_id, protagonist)
+		UNIQUE(preference_id, name)
 	);
 
 	CREATE TABLE IF NOT EXISTS director_score (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 		preference_id uuid REFERENCES preference(id) ON DELETE CASCADE,
-		director VARCHAR,
+		name VARCHAR,
 		score DECIMAL(5, 2),
-		UNIQUE(preference_id, director)
+		UNIQUE(preference_id, name)
 	);
 
 	CREATE TABLE IF NOT EXISTS history (
