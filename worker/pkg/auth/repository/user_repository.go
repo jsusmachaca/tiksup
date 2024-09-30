@@ -46,6 +46,32 @@ func (user *UserRepository) InsertUser(data userModel.User) error {
 	return nil
 }
 
+func (user *UserRepository) GetUser(data userModel.User) (userModel.User, error) {
+	var userData userModel.User
+
+	query := `SELECT id, username, password
+	FROM users WHERE username=$1;`
+	err := user.DB.QueryRow(query, data.Username).Scan(
+		&userData.ID,
+		&userData.Username,
+		&userData.Password,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return userData, validation.ErrIncorrectCredentials
+		}
+		log.Println("Error querying for user:", err)
+		return userData, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(data.Password))
+	if err != nil {
+		return userData, validation.ErrIncorrectCredentials
+	}
+
+	return userData, nil
+}
+
 func (user *UserRepository) CreatePreference(data userModel.User) error {
 	var userData userModel.User
 
@@ -76,33 +102,7 @@ func (user *UserRepository) CreatePreference(data userModel.User) error {
 	return nil
 }
 
-func (user *UserRepository) GetUser(data userModel.User) (userModel.User, error) {
-	var userData userModel.User
-
-	query := `SELECT id, username, password
-	FROM users WHERE username=$1;`
-	err := user.DB.QueryRow(query, data.Username).Scan(
-		&userData.ID,
-		&userData.Username,
-		&userData.Password,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return userData, validation.ErrIncorrectCredentials
-		}
-		log.Println("Error querying for user:", err)
-		return userData, err
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(data.Password))
-	if err != nil {
-		return userData, validation.ErrIncorrectCredentials
-	}
-
-	return userData, nil
-}
-
-func (user *UserRepository) GetPreference(user_id string) (string, error) {
+func (user *UserRepository) GetPreferenceID(user_id string) (string, error) {
 	var preference userModel.Preference
 
 	query := `SELECT id
@@ -118,4 +118,8 @@ func (user *UserRepository) GetPreference(user_id string) (string, error) {
 		return "", err
 	}
 	return preference.ID, nil
+}
+
+func (user *UserRepository) GetPreferences(user_id string) {
+
 }

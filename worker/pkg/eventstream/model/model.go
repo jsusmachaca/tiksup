@@ -1,8 +1,8 @@
 package model
 
 type KafkaData struct {
-	UserId      string      `json:"user_id"`
-	VideoId     string      `json:"video_id"`
+	UserID      string      `json:"user_id"`
+	VideoID     string      `json:"video_id"`
 	Preferences Preferences `json:"preferences"`
 	Next        bool        `json:"next"`
 }

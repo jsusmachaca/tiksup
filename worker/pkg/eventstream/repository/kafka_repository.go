@@ -15,7 +15,7 @@ type KafkaRepository struct {
 func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	auth := authRepository.UserRepository{DB: kafka.DB}
 
-	preferenceID, err := auth.GetPreference(data.UserId)
+	preferenceID, err := auth.GetPreferenceID(data.UserID)
 	if err != nil {
 		return err
 	}
@@ -100,6 +100,21 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 		return err
 	}
 	log.Println("Updated director success")
+
+	history := `INSERT INTO history (user_id, video_id) 
+		VALUES ($1, $2);`
+	stmtHistory, err := tx.Prepare(history)
+	if err != nil {
+		return err
+	}
+	defer stmtHistory.Close()
+
+	_, err = stmtHistory.Exec(data.UserID, data.VideoID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	log.Println("Insert movie in history")
 
 	return nil
 }
