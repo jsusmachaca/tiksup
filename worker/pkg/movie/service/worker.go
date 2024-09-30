@@ -24,5 +24,11 @@ func MovieWorker(db *sql.DB, kafkaData model.KafkaData) {
 		log.Panicln("Error to marshall recomendations", err)
 	}
 
+	history, err := movie.GetHistory(user_id)
+	if err != nil {
+		log.Println("No history", err)
+	}
+
 	fmt.Printf("%s\n", jsonData)
+	fmt.Printf("%s\n", history)
 }

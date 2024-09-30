@@ -4,7 +4,7 @@ const { streamDataSchema } = require('../schemas/StreamDataSchema');
 const { validateToken } = require('../config/jwt');
 
 const postUserMovieData = async (req, res) => {
-  const { video_id, watching_time, watching_repeat, data } = req.body;
+  const { movie_id, watching_time, watching_repeat, data } = req.body;
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.startsWith('Bearer ') 
                 ? authHeader.split(' ')[1] 
@@ -19,7 +19,7 @@ const postUserMovieData = async (req, res) => {
 
   const { error } = streamDataSchema.validate({ 
     user_id: decodedToken.user_id,
-    video_id, 
+    movie_id, 
     watching_time, 
     watching_repeat, 
     data 
@@ -68,11 +68,11 @@ const postUserMovieData = async (req, res) => {
   try {
     const mensajeJson = {
       user_id: decodedToken.user_id,
-      video_id,
+      movie_id,
       watching_time,
       watching_repeat,
       preferences,
-      next: false,
+      next: true,
     };
 
     const mensajeString = JSON.stringify(mensajeJson);
