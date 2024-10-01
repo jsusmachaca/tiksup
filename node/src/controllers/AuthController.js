@@ -15,9 +15,9 @@ const registerUser = async (req, res) => {
   try {
     const endpointURL = `${process.env.WORKER_URL}/api/register`;
     const request = {
-    first_name: first_name,
-    username: username,
-    password: password
+      first_name: first_name,
+      username: username,
+      password: password
     };
     const response = await axios.post(endpointURL, request);
 
@@ -40,8 +40,8 @@ const loginUser = async (req, res) => {
     const endpointURL = `${process.env.WORKER_URL}/api/login`;
 
     const request = {
-        username: username,
-        password: password
+      username: username,
+      password: password
     };
 
     const response = await axios.post(endpointURL, request);

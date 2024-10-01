@@ -11,7 +11,7 @@ type Movie struct {
 	Director    string             `bson:"director" json:"director"`
 }
 
-type MovieRemendation struct {
+type MovieRemmendation struct {
 	UserID      string `json:"user_id"`
 	Preferences `json:"preferences"`
 	Movies      []Movie `json:"movies"`

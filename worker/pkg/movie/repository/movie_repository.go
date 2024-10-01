@@ -13,24 +13,24 @@ type MovieRository struct {
 	DB *sql.DB
 }
 
-func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendation, error) {
-	var recomendation model.MovieRemendation
+func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendation, error) {
+	var recommendation model.MovieRemmendation
 	var genre model.GenreScore
 	var protagonist model.ProtagonistScore
 	var director model.DirectorScore
 
 	user := repository.UserRepository{DB: movie.DB}
 
-	recomendation.UserID = user_id
+	recommendation.UserID = user_id
 
 	preferenceID, err := user.GetPreferenceID(user_id)
 	if err != nil {
-		return recomendation, err
+		return recommendation, err
 	}
 
 	tx, err := movie.DB.Begin()
 	if err != nil {
-		return recomendation, err
+		return recommendation, err
 	}
 
 	defer func() {
@@ -49,7 +49,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendati
 		WHERE preference_id=$1;`
 	rowsGenre, err := tx.Query(queryGenre, preferenceID)
 	if err != nil {
-		return recomendation, err
+		return recommendation, err
 	}
 	defer rowsGenre.Close()
 
@@ -58,9 +58,9 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendati
 			&genre.Name,
 			&genre.Score,
 		); err != nil {
-			return recomendation, err
+			return recommendation, err
 		}
-		recomendation.Preferences.GenreScore = append(recomendation.Preferences.GenreScore, genre)
+		recommendation.Preferences.GenreScore = append(recommendation.Preferences.GenreScore, genre)
 	}
 
 	// Protagonist Query
@@ -70,7 +70,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendati
 		WHERE preference_id=$1;`
 	rowsProtagonist, err := tx.Query(queryProtagonist, preferenceID)
 	if err != nil {
-		return recomendation, err
+		return recommendation, err
 	}
 	defer rowsProtagonist.Close()
 
@@ -79,9 +79,9 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendati
 			&protagonist.Name,
 			&protagonist.Score,
 		); err != nil {
-			return recomendation, err
+			return recommendation, err
 		}
-		recomendation.Preferences.ProtagonistScore = append(recomendation.Preferences.ProtagonistScore, protagonist)
+		recommendation.Preferences.ProtagonistScore = append(recommendation.Preferences.ProtagonistScore, protagonist)
 	}
 
 	// Director Query
@@ -91,7 +91,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendati
 		WHERE preference_id=$1;`
 	rowsDirector, err := tx.Query(queryDirector, preferenceID)
 	if err != nil {
-		return recomendation, err
+		return recommendation, err
 	}
 	defer rowsDirector.Close()
 
@@ -100,12 +100,12 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendati
 			&director.Name,
 			&director.Score,
 		); err != nil {
-			return recomendation, err
+			return recommendation, err
 		}
-		recomendation.Preferences.DirectorScore = append(recomendation.Preferences.DirectorScore, director)
+		recommendation.Preferences.DirectorScore = append(recommendation.Preferences.DirectorScore, director)
 	}
 
-	return recomendation, nil
+	return recommendation, nil
 }
 
 func (movie *MovieRository) GetHistory(user_id string) ([]primitive.ObjectID, error) {
