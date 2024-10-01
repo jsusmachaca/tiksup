@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MongoRepository struct {
@@ -16,10 +15,14 @@ type MongoRepository struct {
 
 func (movie *MongoRepository) GetMoviesExcludeHistory(history []primitive.ObjectID, movies any) error {
 	filter := bson.M{"_id": bson.M{"$nin": history}}
-	findOptions := options.Find()
-	findOptions.SetLimit(6)
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: filter}},
+		{{Key: "$sample", Value: bson.D{
+			{Key: "size", Value: 6},
+		}}},
+	}
 
-	cursor, err := movie.Collection.Find(movie.CTX, filter, findOptions)
+	cursor, err := movie.Collection.Aggregate(movie.CTX, pipeline)
 	if err != nil {
 		return err
 	}

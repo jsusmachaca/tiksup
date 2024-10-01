@@ -6,6 +6,7 @@ import (
 
 	authRepository "github.com/jsusmachaca/tiksup/pkg/auth/repository"
 	"github.com/jsusmachaca/tiksup/pkg/eventstream/model"
+	"github.com/jsusmachaca/tiksup/pkg/eventstream/validation"
 )
 
 type KafkaRepository struct {
@@ -108,7 +109,8 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	}
 	defer stmtHistory.Close()
 
-	_, err = stmtHistory.Exec(data.UserID, data.MovieID)
+	movie_id := validation.IsValidObjectID(data.MovieID)
+	_, err = stmtHistory.Exec(data.UserID, movie_id)
 	if err != nil {
 		log.Println(err)
 		return err

@@ -15,13 +15,13 @@ type MovieRository struct {
 
 func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendation, error) {
 	var recommendation model.MovieRemmendation
-	var genre model.GenreScore
-	var protagonist model.ProtagonistScore
-	var director model.DirectorScore
-
-	user := repository.UserRepository{DB: movie.DB}
-
 	recommendation.UserID = user_id
+	recommendation.Preferences = model.Preferences{
+		GenreScore:       []model.GenreScore{},
+		ProtagonistScore: []model.ProtagonistScore{},
+		DirectorScore:    []model.DirectorScore{},
+	}
+	user := repository.UserRepository{DB: movie.DB}
 
 	preferenceID, err := user.GetPreferenceID(user_id)
 	if err != nil {
@@ -54,6 +54,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendat
 	defer rowsGenre.Close()
 
 	for rowsGenre.Next() {
+		var genre model.GenreScore
 		if err := rowsGenre.Scan(
 			&genre.Name,
 			&genre.Score,
@@ -75,6 +76,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendat
 	defer rowsProtagonist.Close()
 
 	for rowsProtagonist.Next() {
+		var protagonist model.ProtagonistScore
 		if err := rowsProtagonist.Scan(
 			&protagonist.Name,
 			&protagonist.Score,
@@ -96,6 +98,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendat
 	defer rowsDirector.Close()
 
 	for rowsDirector.Next() {
+		var director model.DirectorScore
 		if err := rowsDirector.Scan(
 			&director.Name,
 			&director.Score,
