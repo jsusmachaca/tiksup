@@ -1,3 +1,6 @@
 .env
 node/.git
 movies.json
+venv
+node_modules
+__pycache__

@@ -1,71 +1,75 @@
-const { preferences } = require('joi');
 const { producer } = require('../config/kafka');
 const { streamDataSchema } = require('../schemas/StreamDataSchema');
 const { validateToken } = require('../config/jwt');
+const axios = require('axios')
 
 const postUserMovieData = async (req, res) => {
-  const { movie_id, watching_time, watching_repeat, data } = req.body;
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.startsWith('Bearer ') 
-                ? authHeader.split(' ')[1] 
-                : null;
-
-  if (!token) {
-    return res.status(401).json({ error: 'Token no proporcionado' });
-  }
-
-  const decodedToken = validateToken(token)
-  if (decodedToken === null) return res.status(401).json({ error: 'Token no valido' });
-
-  const { error } = streamDataSchema.validate({ 
-    user_id: decodedToken.user_id,
-    movie_id, 
-    watching_time, 
-    watching_repeat, 
-    data 
-  });
-  
-  if (error) {
-    return res.status(400).json({ 
-      serror: error.details[0].message.replace(/"/g, '') 
-    });
-  }
-
-  let preferences = {
-    genre_score: [],
-    protagonist_score: { name: "", score: 0.0 },
-    director_score: { name: "", score: 0.0 }
-  };
-
-  data.genre.forEach(genre => {
-    preferences.genre_score.push({ name: genre, score: 0.0 });
-  });
-
-  if (watching_time >= 15) {
-    preferences.genre_score.forEach(item => item.score += 1.0);
-    preferences.protagonist_score.score += 1.0;
-    preferences.director_score.score += 1.0;
-  } else if (watching_time >= 10) {
-    preferences.genre_score.forEach(item => item.score += 0.5);
-    preferences.protagonist_score.score += 0.5;
-    preferences.director_score.score += 0.5;
-  } else if (watching_time < 5) {
-    preferences.genre_score.forEach(item => item.score -= 0.5);
-    preferences.protagonist_score.score -= 0.5;
-    preferences.director_score.score -= 0.5;
-  }
-
-  if (watching_repeat > 1) {
-    const repeatBonus = 0.5 * (watching_repeat - 1);
-    preferences.genre_score.forEach(item => item.score += repeatBonus);
-    preferences.protagonist_score.score += repeatBonus;
-    preferences.director_score.score += repeatBonus;
-  }
-
-  preferences.protagonist_score.name = data.protagonist;
-  preferences.director_score.name = data.director;
-
   try {
+    const { movie_id, watching_time, watching_repeat, data } = req.body;
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer')) 
+      return res.status(401).json({ error: 'Token no proporcionado' });
+
+    const token = authHeader.substring(7)
+    const decodedToken = validateToken(token)
+    if (decodedToken === null) 
+      return res.status(401).json({ error: 'Token no valido' });
+
+    const { error } = streamDataSchema.validate({ 
+      user_id: decodedToken.user_id,
+      movie_id, 
+      watching_time, 
+      watching_repeat, 
+      data 
+    });
+    
+    if (error) {
+      return res.status(400).json({ 
+        serror: error.details[0].message.replace(/"/g, '') 
+      });
+    }
+
+    const endpointURL = `${process.env.WORKER_URL}/user-info`;
+
+    const response = await axios.get(endpointURL, {
+      headers: {
+        "Authorization": authHeader
+      }
+    });
+
+    let preferencesResponse = response.data.preferences
+
+    data.genre.forEach(genre => {
+      let found = preferencesResponse.genre_score.find(g => g.name === genre);
+      if (found) {
+        found.score += calculateScore(watching_time, watching_repeat);
+      } else {
+        preferencesResponse.genre_score.push({ name: genre, score: calculateScore(watching_time, watching_repeat) });
+      }
+    });
+
+    let protagonistFound = preferencesResponse.protagonist_score.find(p => p.name === data.protagonist);
+    if (protagonistFound) {
+      protagonistFound.score += calculateScore(watching_time, watching_repeat);
+    } else {
+      protagonistFound = { name: data.protagonist, score: calculateScore(watching_time, watching_repeat) };
+    }
+
+    let directorFound = preferencesResponse.director_score.find(d => d.name === data.director);
+    if (directorFound) {
+      directorFound.score += calculateScore(watching_time, watching_repeat);
+    } else {
+      directorFound = { name: data.director, score: calculateScore(watching_time, watching_repeat) };
+    }
+
+    let preferences = {
+      genre_score: preferencesResponse.genre_score,
+      protagonist_score: protagonistFound,
+      director_score: directorFound
+    };
+
+
     const mensajeJson = {
       user_id: decodedToken.user_id,
       movie_id,
@@ -88,5 +92,22 @@ const postUserMovieData = async (req, res) => {
     res.status(500).json({ error: 'Error al enviar mensaje a Kafka' });
   }
 };
+
+function calculateScore(watching_time, watching_repeat) {
+  let score = 0;
+  if (watching_time >= 15) {
+    score += 1.0;
+  } else if (watching_time >= 10) {
+    score += 0.5;
+  } else if (watching_time < 5) {
+    score -= 0.5;
+  }
+
+  if (watching_repeat > 1) {
+    score += 0.5 * (watching_repeat - 1);
+  }
+
+  return score;
+}
 
 module.exports = { postUserMovieData };
