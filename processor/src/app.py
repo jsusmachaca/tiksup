@@ -5,16 +5,20 @@ import uuid
 from fastapi import FastAPI
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType
+from os import environ
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
-redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
+redis_client = redis.StrictRedis(host=environ.get("REDIS_HOST"), port=environ.get("REDIS_PORT"), db=0)
 
 while True:
     try:
         spark = SparkSession.builder \
             .appName("MyApp") \
-            .master("spark://spark-master:7077") \
+            .master(f"spark://{environ.get("SPARK_HOST")}:{environ.get("SPARK_PORT")}") \
             .getOrCreate()
         break
     except Exception as e:
@@ -88,9 +92,8 @@ async def receive_data(data: dict):
     }
 
     movies = data.get("movies", [])
-
     recommendations = recommend_movies(user_preferences, movies)
 
     redis_client.set(f"user:{user_preferences['user_id']}:recommendations", json.dumps(recommendations))
 
-    return {"message": "Datos recibidos correctamente", "status": 200}
+    return {"message": "Recived data"}
