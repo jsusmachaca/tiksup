@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  spark-master:
+    image: bitnami/spark:latest
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    networks:
+      - spark-network
+
+
+  spark-worker:
+    image: bitnami/spark:latest
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    networks:
+      - spark-network
+
+
+  python:
+    build: ./python
+    depends_on:
+      - spark-master
+      - spark-worker
+      - redis
+    networks:
+      - spark-network
+    ports:
+      - "8000:8000"  
+
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - spark-network
+
+networks:
+  spark-network:
+    driver: bridge
