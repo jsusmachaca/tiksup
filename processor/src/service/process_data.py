@@ -19,7 +19,7 @@ class SparkProcess:
                 sleep(1)
 
         self.movie_schema = StructType([
-            StructField("movie_id", StringType(), True),
+            StructField("id", StringType(), True),
             StructField("url", StringType(), True),
             StructField("genre", ArrayType(StringType()), True),
             StructField("director", StringType(), True),
@@ -66,7 +66,7 @@ class SparkProcess:
         result = {
             "user_id": user_preferences["user_id"],
             "movies": [{
-                "movie_id": row.movie_id if row.movie_id is not None else str(uuid.uuid4()),  
+                "id": row.id,
                 "url": row.url,
                 "title": row.title,
                 "genre": row.genre,

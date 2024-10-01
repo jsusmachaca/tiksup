@@ -3,7 +3,7 @@ import redis
 from fastapi import FastAPI
 from os import environ
 from dotenv import load_dotenv
-from service import SparkProcess
+from .service import SparkProcess
 
 load_dotenv()
 
