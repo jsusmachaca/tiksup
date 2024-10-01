@@ -39,4 +39,6 @@ func MovieWorker(db *sql.DB, kafkaData model.KafkaData, mC model.MongoConnection
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Println("\033[32mmovies send to data processor\033[0m")
 }
