@@ -74,6 +74,9 @@ func route(mux *http.ServeMux, db *sql.DB) {
 		handler.Register(w, r, db)
 	})
 	mux.HandleFunc("GET /user-info", func(w http.ResponseWriter, r *http.Request) {
-		handler.GetMovieScores(w, r, db)
+		handler.GetUserInfo(w, r, db)
+	})
+	mux.HandleFunc("GET /random-movies", func(w http.ResponseWriter, r *http.Request) {
+		handler.GetRandomMovies(w, r, db, mC)
 	})
 }

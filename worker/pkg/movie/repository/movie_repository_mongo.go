@@ -34,3 +34,23 @@ func (movie *MongoRepository) GetMoviesExcludeHistory(history []primitive.Object
 	}
 	return nil
 }
+
+func (movie *MongoRepository) GetRadomMovies(movies any) error {
+	pipeline := mongo.Pipeline{
+		{{Key: "$sample", Value: bson.D{
+			{Key: "size", Value: 6},
+		}}},
+	}
+
+	cursor, err := movie.Collection.Aggregate(movie.CTX, pipeline)
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(movie.CTX)
+
+	err = cursor.All(movie.CTX, movies)
+	if err != nil {
+		return err
+	}
+	return nil
+}
