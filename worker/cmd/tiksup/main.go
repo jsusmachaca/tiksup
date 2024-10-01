@@ -73,4 +73,7 @@ func route(mux *http.ServeMux, db *sql.DB) {
 	mux.HandleFunc("POST /api/register", func(w http.ResponseWriter, r *http.Request) {
 		handler.Register(w, r, db)
 	})
+	mux.HandleFunc("GET /user-info", func(w http.ResponseWriter, r *http.Request) {
+		handler.GetMovieScores(w, r, db)
+	})
 }
