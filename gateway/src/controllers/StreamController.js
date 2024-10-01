@@ -17,7 +17,7 @@ export const postUserMovieData = async (req, res) => {
     if (decodedToken === null) 
       return res.status(401).json({ error: 'Token no valido' });
 
-    const { error } = streamDataSchema.validate({ 
+    const { error, value } = streamDataSchema.validate({ 
       user_id: decodedToken.user_id,
       movie_id, 
       watching_time, 
@@ -74,15 +74,14 @@ export const postUserMovieData = async (req, res) => {
 
     const mensajeJson = {
       user_id: decodedToken.user_id,
-      movie_id,
-      watching_time,
-      watching_repeat,
+      movie_id: value.movie_id,
+      watching_time: value.watching_time,
+      watching_repeat: value.watching_repeat,
       preferences,
       next,
     };
 
     const mensajeString = JSON.stringify(mensajeJson);
-
     await producer.send({
       topic: 'tiksup-user-data', 
       messages: [{ value: mensajeString }],
@@ -91,7 +90,7 @@ export const postUserMovieData = async (req, res) => {
     res.status(200).json({ message: 'Mensaje enviado a Kafka con éxito' });
   } catch (error) {
     console.error('Error al enviar mensaje a Kafka:', error);
-    res.status(500).json({ error: 'Error al enviar mensaje a Kafka' });
+    return res.status(500).json({ error: 'Error al enviar mensaje a Kafka' });
   }
 };
 
