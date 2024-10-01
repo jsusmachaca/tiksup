@@ -22,7 +22,8 @@ func KafKaConsumer(configMap *kafka.ConfigMap) (*kafka.Consumer, error) {
 		return nil, err
 	}
 
-	err = consumer.Subscribe("tiksup-user-data", nil)
+	topic := os.Getenv("KAFKA_TOPIC")
+	err = consumer.Subscribe(topic, nil)
 	if err != nil {
 		return nil, err
 	}

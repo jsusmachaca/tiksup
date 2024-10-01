@@ -6,6 +6,7 @@ import (
 
 	"github.com/jsusmachaca/tiksup/pkg/auth/repository"
 	"github.com/jsusmachaca/tiksup/pkg/movie/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MovieRository struct {
@@ -107,9 +108,9 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemendati
 	return recomendation, nil
 }
 
-func (movie *MovieRository) GetHistory(user_id string) ([]model.History, error) {
+func (movie *MovieRository) GetHistory(user_id string) ([]primitive.ObjectID, error) {
 	var history model.History
-	var historyArray []model.History
+	var historyArray []primitive.ObjectID
 
 	queryHistory := `SELECT movie_id FROM history WHERE user_id=$1;`
 	rowsHistory, err := movie.DB.Query(queryHistory, user_id)
@@ -124,7 +125,11 @@ func (movie *MovieRository) GetHistory(user_id string) ([]model.History, error) 
 		); err != nil {
 			return historyArray, err
 		}
-		historyArray = append(historyArray, history)
+		objectID, err := primitive.ObjectIDFromHex(history.MovieID)
+		if err != nil {
+			return historyArray, err
+		}
+		historyArray = append(historyArray, objectID)
 	}
 
 	return historyArray, nil

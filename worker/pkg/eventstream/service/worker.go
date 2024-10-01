@@ -12,7 +12,7 @@ import (
 	movieService "github.com/jsusmachaca/tiksup/pkg/movie/service"
 )
 
-func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB) error {
+func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB, mC modelKafka.MongoConnection) error {
 	var kafkaData modelKafka.KafkaData
 	kafaDB := repository.KafkaRepository{DB: db}
 
@@ -35,7 +35,7 @@ func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB) error {
 			log.Printf("Error to insert kafka information: %v\n", err)
 		}
 		if kafkaData.Next {
-			go movieService.MovieWorker(db, kafkaData)
+			go movieService.MovieWorker(db, kafkaData, mC)
 		}
 	}
 }

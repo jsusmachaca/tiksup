@@ -1,11 +1,14 @@
 package model
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Movie struct {
-	URL         string   `json:"url"`
-	Title       string   `json:"title"`
-	Genre       []string `json:"genre"`
-	Protagonist string   `json:"protagonist"`
-	Director    string   `json:"director"`
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	URL         string             `bson:"url" json:"url"`
+	Title       string             `bson:"title" json:"title"`
+	Genre       []string           `bson:"genre" json:"genre"`
+	Protagonist string             `bson:"protagonist" json:"protagonist"`
+	Director    string             `bson:"director" json:"director"`
 }
 
 type MovieRemendation struct {

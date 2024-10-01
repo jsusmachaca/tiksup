@@ -13,14 +13,17 @@ import (
 	"github.com/jsusmachaca/tiksup/api/handler"
 	"github.com/jsusmachaca/tiksup/internal/config"
 	"github.com/jsusmachaca/tiksup/internal/database"
+	"github.com/jsusmachaca/tiksup/pkg/eventstream/model"
 	kafkaService "github.com/jsusmachaca/tiksup/pkg/eventstream/service"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// var collection *mongo.Collection
 var (
-	configMap kafka.ConfigMap
-	ctx       = context.TODO()
-	db        *sql.DB
+	collection *mongo.Collection
+	configMap  kafka.ConfigMap
+	ctx        = context.TODO()
+	db         *sql.DB
+	mC         model.MongoConnection
 )
 
 func init() {
@@ -40,14 +43,15 @@ func init() {
 		log.Fatalf("Migration failed: %v", err)
 	}
 
-	_, err = database.MongoConnection(ctx)
+	collection, err = database.MongoConnection(ctx)
 	if err != nil {
 		log.Fatalf("Error trying to connect to mongo: %v", err)
 	}
+	mC = model.MongoConnection{Collection: collection, CTX: ctx}
 }
 
 func main() {
-	go kafkaService.KafkaWorker(&configMap, db)
+	go kafkaService.KafkaWorker(&configMap, db, mC)
 
 	mux := http.NewServeMux()
 	route(mux, db)

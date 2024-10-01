@@ -15,6 +15,7 @@ func MongoConnection(ctx context.Context) (*mongo.Collection, error) {
 	MONGO_USER := os.Getenv("MONGO_USER")
 	MONGO_PASSWORD := os.Getenv("MONGO_PASSWORD")
 	MONGO_DB := os.Getenv("MONGO_DB")
+	MONGO_COLLECTION := os.Getenv("MONGO_COLLECTION")
 
 	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin", MONGO_USER, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT)
 
@@ -28,7 +29,7 @@ func MongoConnection(ctx context.Context) (*mongo.Collection, error) {
 		return nil, err
 	}
 
-	collection := client.Database(MONGO_DB).Collection("videos")
+	collection := client.Database(MONGO_DB).Collection(MONGO_COLLECTION)
 
 	return collection, nil
 }
