@@ -72,7 +72,6 @@ class SparkProcess:
                 "genre": row.genre,
                 "director": row.director,
                 "protagonist": row.protagonist,
-                "score": row.combined_score
             } for row in sorted_recommendations]
         }
 
