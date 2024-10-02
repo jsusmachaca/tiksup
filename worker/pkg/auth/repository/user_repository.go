@@ -112,7 +112,7 @@ func (user *UserRepository) GetPreferenceID(user_id string) (string, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", validation.ErrIncorrectCredentials
+			return "", validation.ErrNoPreferencesFound
 		}
 		log.Println("Error querying for user:", err)
 		return "", err
