@@ -1,4 +1,21 @@
 services:
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=jsus
+      - MONGO_INITDB_ROOT_PASSWORD=godylody
+    ports:
+      - "27017:27017"
+
+  postgres:
+    image: postgres:17-alpine3.20
+    environment:
+      - POSTGRES_USER=jsus
+      - POSTGRES_PASSWORD=godylody
+      - POSTGRES_DB=bro
+    ports:
+      - "5432:5432"
+
   spark-master:
     image: bitnami/spark:latest
     environment:
@@ -33,3 +50,51 @@ services:
       - SPARK_PORT=7077
     ports:
       - "8000:8000"
+
+  worker:
+    build: ./worker
+    environment:
+      - SECRET_KEY=NzdkZjdkNTktZTk5OC00N2JmLTg4MDgtNzdkZDFmM2QxOGUwCg==
+      - PORT=8081
+
+      - API_URL=http://gateway:8000
+
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_NAME=bro
+      - PG_USER=jsus
+      - PG_PASSWORD=godylody
+      - KAFKA_SERVER=161.132.40.126:9092
+      - KAFKA_TOPIC=tiksup-user-data
+
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_USER=jsus
+      - MONGO_PASSWORD=godylody
+      - MONGO_DB=tiksup
+      - MONGO_COLLECTION=movies
+    depends_on:
+      - spark-master
+      - spark-worker
+      - redis
+      - mongo
+      - postgres
+    ports:
+      - "8081:8081"
+
+  gateway:
+    build: ./gateway
+    depends_on:
+      - spark-master
+      - spark-worker
+      - redis
+    environment:
+      - SECRET_KEY=NzdkZjdkNTktZTk5OC00N2JmLTg4MDgtNzdkZDFmM2QxOGUwCg==
+      - KAFKA_BROKER=161.132.40.126:9092
+      - WORKER_URL=http://worker:8081
+      - GRPC_HOST=localhost:50051
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "3000:3000"
