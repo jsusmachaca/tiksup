@@ -6,8 +6,6 @@ services:
 
   mongo:
     image: mongo:8.0.1-rc0-noble
-    env_file:
-      - .env.docker
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
@@ -18,16 +16,12 @@ services:
     image: mongo:8.0.1-rc0-noble
     volumes:
       - ./movies.json:/app/movies.json
-    env_file:
-      - .env.docker
     command: >
       mongoimport -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin --host mongo --db ${MONGO_DB} --collection ${MONGO_COLLECTION} --type json --file /app/movies.json --jsonArray
     restart: "no"
 
   postgres:
     image: postgres:17-alpine3.20
-    env_file:
-      - .env.docker
     environment:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
@@ -57,8 +51,6 @@ services:
       - spark-master
       - spark-worker
       - redis
-    env_file:
-      - .env.docker
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
@@ -70,8 +62,6 @@ services:
 
   worker:
     build: ./worker
-    env_file:
-      - .env.docker
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - PORT=${WORKER_PORT}
@@ -100,8 +90,6 @@ services:
     build: ./gateway
     depends_on:
       - redis
-    env_file:
-      - .env.docker
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - KAFKA_BROKER=${KAFKA_SERVER}
