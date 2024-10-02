@@ -1,6 +1,5 @@
 {
     "editor.fontFamily": "GeistMono Nerd Font, VictorMono Nerd Font, Iosevka Nerd Font, CaskaydiaCove Nerd Font, DaddyTimeMono Nerd Font",
-    "workbench.colorTheme": "Red",
     "[javascript]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true
