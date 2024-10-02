@@ -14,14 +14,13 @@ import (
 
 func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer r.Body.Close()
-
 	user := userRepository.UserRepository{DB: db}
 
-	var body modelUser.User
+	w.Header().Set("Content-Type", "application/json")
 
+	var body modelUser.User
 	if err := validation.UserValidation(r.Body, &body); err != nil {
 		response := response.ErrorResponse{Error: "Invalid data"}
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -30,7 +29,6 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	data, err := user.GetUser(body)
 	if err != nil {
 		response := response.ErrorResponse{Error: "Invalid username or password"}
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -39,13 +37,11 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	token, err := util.CreateToken(data.ID, data.Username)
 	if err != nil {
 		response := response.ErrorResponse{Error: "Internal server error"}
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"access_token": token,
 	})
@@ -53,14 +49,13 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer r.Body.Close()
-
 	user := userRepository.UserRepository{DB: db}
 
-	var body modelUser.User
+	w.Header().Set("Content-Type", "application/json")
 
+	var body modelUser.User
 	if err := validation.UserValidation(r.Body, &body); err != nil {
 		response := response.ErrorResponse{Error: "Invalid data"}
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -69,7 +64,6 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err := user.InsertUser(body)
 	if err != nil {
 		response := response.ErrorResponse{Error: "Error registering user"}
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -78,13 +72,11 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err = user.CreatePreference(body)
 	if err != nil {
 		response := response.ErrorResponse{Error: "Internal server error"}
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	response := map[string]string{
 		"first_name": body.FirstName,
 		"username":   body.Username,

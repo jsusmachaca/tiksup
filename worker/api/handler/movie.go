@@ -16,11 +16,11 @@ import (
 func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	movie := repository.MovieRository{DB: db}
 
-	token := r.Header.Get("Authorization")
+	w.Header().Set("Content-Type", "application/json")
 
+	token := r.Header.Get("Authorization")
 	if !strings.HasPrefix(token, "Bearer ") {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Token not provided"}`))
 		return
 	}
@@ -28,7 +28,6 @@ func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	claims, err := util.ValidateToken(token)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Token is not valid"}`))
 		return
 	}
@@ -36,15 +35,12 @@ func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	recomendation, err := movie.GetPreferences(claims["user_id"].(string))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Internal server error"}`))
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(recomendation); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Internal server error"}`))
 		return
 	}
@@ -54,11 +50,11 @@ func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mC mode
 	movieMongo := repository.MongoRepository{Collection: mC.Collection, CTX: mC.CTX}
 	var randomMovie []movieModel.Movie
 
-	token := r.Header.Get("Authorization")
+	w.Header().Set("Content-Type", "application/json")
 
+	token := r.Header.Get("Authorization")
 	if !strings.HasPrefix(token, "Bearer ") {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Token not provided"}`))
 		return
 	}
@@ -66,7 +62,6 @@ func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mC mode
 	claims, err := util.ValidateToken(token)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Token is not valid"}`))
 		return
 	}
@@ -74,7 +69,6 @@ func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mC mode
 	err = movieMongo.GetRadomMovies(&randomMovie)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Internal server error"}`))
 		return
 	}
@@ -84,10 +78,8 @@ func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mC mode
 		Movies: randomMovie,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"error": "Internal server error"}`))
 		return
 	}
