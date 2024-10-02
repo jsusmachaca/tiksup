@@ -83,7 +83,7 @@ export const postUserMovieData = async (req, res) => {
 
     const mensajeString = JSON.stringify(mensajeJson);
     await producer.send({
-      topic: 'tiksup-user-data', 
+      topic: process.env.KAFKA_TOPIC, 
       messages: [{ value: mensajeString }],
     });
 
