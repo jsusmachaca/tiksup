@@ -92,7 +92,7 @@ services:
       - redis
     environment:
       - SECRET_KEY=${SECRET_KEY}
-      - KAFKA_BROKER=${KAFKA_SERVER}
+      - KAFKA_SERVER=${KAFKA_SERVER}
       - WORKER_URL=${WORKER_URL}
       - GRPC_HOST=${GRPC_HOST}
       - PORT=${NODE_PORT}
