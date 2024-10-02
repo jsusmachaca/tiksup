@@ -9,7 +9,7 @@ import (
 )
 
 func ApiService(body io.Reader) error {
-	API_URL := os.Getenv("API_URL")
+	API_URL := os.Getenv("PROCESSOR_URL")
 
 	client := &http.Client{}
 
