@@ -42,9 +42,14 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"access_token": token,
-	})
+	}); err != nil {
+		response := response.ErrorResponse{Error: "Internal server error"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
 }
 
 func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -77,11 +82,15 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	response := map[string]string{
+	successResponse := map[string]string{
 		"first_name": body.FirstName,
 		"username":   body.Username,
 		"password":   body.Password,
 	}
-
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(successResponse); err != nil {
+		response := response.ErrorResponse{Error: "Internal server error"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
 }
