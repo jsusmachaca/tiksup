@@ -4,3 +4,4 @@ movies.json
 venv
 node_modules
 __pycache__
+.env.docker
