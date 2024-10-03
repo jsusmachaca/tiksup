@@ -1,12 +1,14 @@
 import express, { json } from 'express';
 import cargarRutas from './routes/Loader.js';
 import { iniciarProductor } from './config/kafka.js';
+import cors from 'cors';
 import 'dotenv/config'
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(json());
+app.use(cors());
 
 cargarRutas(app);
 
