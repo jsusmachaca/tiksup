@@ -27,7 +27,7 @@ export const getMovies = async(req, res) => {
       response.data.preferences.genre_score.length === 0 || 
       response.data.preferences.protagonist_score.length === 0 || 
       response.data.preferences.director_score.length === 0 ||
-      recommendations.movies.length === 0
+      !recommendations || recommendations.movies.length === 0
     ) {
         console.log("Using random data")
 

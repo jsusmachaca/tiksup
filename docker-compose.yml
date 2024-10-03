@@ -15,7 +15,7 @@ services:
   mongo-builder:
     image: mongo:8.0.1-rc0-noble
     volumes:
-      - ./movies.json:/app/movies.json
+      - ./movies.json:/app/movies.json:ro
     command: >
       mongoimport -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin --host mongo --db ${MONGO_DB} --collection ${MONGO_COLLECTION} --type json --file /app/movies.json --jsonArray
     restart: "no"

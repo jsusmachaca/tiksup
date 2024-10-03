@@ -3,7 +3,7 @@ from pyspark.sql.types import StructType, StructField, StringType, ArrayType
 from pyspark.sql import functions as F
 from os import environ
 from time import sleep
-import uuid
+
 
 class SparkProcess:
     def __init__(self) -> None:
