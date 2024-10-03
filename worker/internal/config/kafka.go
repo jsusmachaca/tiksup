@@ -10,8 +10,8 @@ import (
 func KafkaConfig() kafka.ConfigMap {
 	configMap := kafka.ConfigMap{
 		"bootstrap.servers": os.Getenv("KAFKA_SERVER"),
-		"group.id":          "vote-consumer",
-		"auto.offset.reset": "earliest",
+		"group.id":          "user-info-consumer",
+		"auto.offset.reset": "latest",
 	}
 	return configMap
 }
