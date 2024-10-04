@@ -93,6 +93,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - KAFKA_SERVER=${KAFKA_SERVER}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
       - WORKER_URL=${WORKER_URL}
       - GRPC_HOST=${GRPC_HOST}
       - PORT=${NODE_PORT}

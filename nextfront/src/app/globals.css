@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.video-list {
+  @apply h-screen overflow-y-scroll snap-y snap-mandatory;
+}
+
+.video-item {
+  @apply h-screen snap-start flex items-center justify-center bg-black text-white relative;
+}
+
+.video-item video {
+  @apply w-full h-full object-cover;
+}
+
+.video-item h3, .video-item p {
+  @apply absolute bottom-0 left-0 p-4;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
