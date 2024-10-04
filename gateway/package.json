@@ -22,5 +22,11 @@
     "jsonwebtoken": "9.0.2",
     "kafkajs": "^2.2.4",
     "redis": "4.7.0"
+  },
+  "devDependencies": {
+    "standard": "^17.1.2"
+  },
+  "eslintConfig": {
+    "extends": "standard"
   }
 }

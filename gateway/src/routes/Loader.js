@@ -1,16 +1,16 @@
-import { readdirSync } from 'fs';
-import { join } from 'path';
+import { readdirSync } from 'fs'
+import { join } from 'path'
 
 const cargarRutas = (app) => {
-  const rutasDir = join(process.cwd(), 'src', 'routes'); 
+  const rutasDir = join(process.cwd(), 'src', 'routes')
 
   readdirSync(rutasDir).forEach(async (archivo) => {
     if (archivo !== 'routeLoader.js' && archivo.endsWith('.js')) {
-      const rutaNombre = archivo.replace('.js', '');
-      const ruta = await import(join(rutasDir, archivo));
-      app.use(`/${rutaNombre.toLowerCase()}`, ruta.default); 
+      const rutaNombre = archivo.replace('.js', '')
+      const ruta = await import(join(rutasDir, archivo))
+      app.use(`/${rutaNombre.toLowerCase()}`, ruta.default)
     }
-  });
-};
+  })
+}
 
-export default cargarRutas;
+export default cargarRutas
