@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken"
+import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 
 export const validateToken = (token) => {
