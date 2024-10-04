@@ -20,28 +20,24 @@ func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	token := r.Header.Get("Authorization")
 	if !strings.HasPrefix(token, "Bearer ") {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{"error": "Token not provided"}`))
+		response.WriteJsonError(w, "Token not provided", http.StatusUnauthorized)
 		return
 	}
 	token = token[7:]
 	claims, err := util.ValidateToken(token)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{"error": "Token is not valid"}`))
+		response.WriteJsonError(w, "Token is not valid", http.StatusUnauthorized)
 		return
 	}
 
 	recomendation, err := movie.GetPreferences(claims["user_id"].(string))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Internal server error"}`))
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := json.NewEncoder(w).Encode(recomendation); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Internal server error"}`))
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 }
@@ -54,33 +50,29 @@ func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mC mode
 
 	token := r.Header.Get("Authorization")
 	if !strings.HasPrefix(token, "Bearer ") {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{"error": "Token not provided"}`))
+		response.WriteJsonError(w, "Token not provided", http.StatusUnauthorized)
 		return
 	}
 	token = token[7:]
 	claims, err := util.ValidateToken(token)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{"error": "Token is not valid"}`))
+		response.WriteJsonError(w, "Token is not valid", http.StatusUnauthorized)
 		return
 	}
 
 	err = movieMongo.GetRadomMovies(&randomMovie)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Internal server error"}`))
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	response := response.RandoMovie{
+	movieResponse := response.RandoMovie{
 		UserID: claims["user_id"].(string),
 		Movies: randomMovie,
 	}
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Internal server error"}`))
+	if err := json.NewEncoder(w).Encode(movieResponse); err != nil {
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 }

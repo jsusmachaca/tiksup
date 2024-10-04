@@ -20,34 +20,26 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	var body modelUser.User
 	if err := validation.UserValidation(r.Body, &body); err != nil {
-		response := response.ErrorResponse{Error: "Invalid data"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Invalid data", http.StatusBadRequest)
 		return
 	}
 
 	data, err := user.GetUser(body)
 	if err != nil {
-		response := response.ErrorResponse{Error: "Invalid username or password"}
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Invalid username or password", http.StatusUnauthorized)
 		return
 	}
 
 	token, err := util.CreateToken(data.ID, data.Username)
 	if err != nil {
-		response := response.ErrorResponse{Error: "Internal server error"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := json.NewEncoder(w).Encode(map[string]string{
 		"access_token": token,
 	}); err != nil {
-		response := response.ErrorResponse{Error: "Internal server error"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 }
@@ -60,25 +52,19 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	var body modelUser.User
 	if err := validation.UserValidation(r.Body, &body); err != nil {
-		response := response.ErrorResponse{Error: "Invalid data"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Invalid data", http.StatusBadRequest)
 		return
 	}
 
 	err := user.InsertUser(body)
 	if err != nil {
-		response := response.ErrorResponse{Error: "Error registering user"}
-		w.WriteHeader(http.StatusNotAcceptable)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Error registering user", http.StatusInternalServerError)
 		return
 	}
 
 	err = user.CreatePreference(body)
 	if err != nil {
-		response := response.ErrorResponse{Error: "Internal server error"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -88,9 +74,7 @@ func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		"password":   body.Password,
 	}
 	if err := json.NewEncoder(w).Encode(successResponse); err != nil {
-		response := response.ErrorResponse{Error: "Internal server error"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 }
