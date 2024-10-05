@@ -41,8 +41,8 @@ const VideoList = () => {
         ref={containerRef}
         onClick={() => setUserInteracted(true)}
       >
-        {videos.map((video) => (
-          <VideoItem key={video.id} video={video} />
+        {videos.map((video, index) => (
+          <VideoItem key={index} video={video} />
         ))}
       </div>
       <div className="absolute top-1/2 left-0 transform -translate-y-1/2">

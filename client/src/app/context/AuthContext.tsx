@@ -3,6 +3,7 @@
 import { createContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../api/apiClient';
+import { AxiosError } from 'axios';
 
 interface AuthContextProps {
   user: { username: string } | null;
@@ -23,6 +24,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<{ username: string } | null>(null);
   const [videos, setVideos] = useState<any[]>([]);
+  const [videosWatched, setVideosWatched] = useState(1);
   const router = useRouter();
 
   const login = async (username: string, password: string) => {
@@ -64,12 +66,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     router.push('/login');
   };
 
-  const getVideos = async () => {
+  const getVideos = async (append = false) => {
     try {
       const res = await api.get('/movies');
-      setVideos(res.data.movies);
+      setVideos((prevVideos) => append ? [...prevVideos, ...res.data.movies] : res.data.movies);
     } catch (error) {
-      console.error('Error fetching videos:', error);
+      console.error('Error fetching videos:', (error as AxiosError).response!);
     }
   };
 
@@ -85,9 +87,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         protagonist: video.protagonist,
         director: video.director,
       },
-      next: false
+      next: videosWatched >= 4
     };
-  
+
     try {
   
       const res = await api.post('/stream/sendmoviedata', data, {
@@ -96,8 +98,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           'Content-Type': 'application/json',
         },
       });
-      
+
+      setVideosWatched((prev) => prev + 1);
       console.log(`Datos enviados con éxito ${res.data.message}`);
+
+      if (videosWatched >= 4) {
+        await getVideos(true);
+        setVideosWatched(1);
+        console.log('fetching for more movies')
+      }
     } catch (error) {
       console.error('Error sending video data:');
     }
