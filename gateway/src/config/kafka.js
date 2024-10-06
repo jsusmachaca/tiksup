@@ -8,7 +8,7 @@ const kafka = new Kafka({
 
 export const producer = kafka.producer()
 
-export const iniciarProductor = async () => {
+export const initProductor = async () => {
   await producer.connect()
   console.log('Kafka producer connected')
 }

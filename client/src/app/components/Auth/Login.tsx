@@ -32,7 +32,7 @@ const AuthForm = () => {
         router.push('/videos');
       }
     } catch (error) {
-      setError('No se pudo iniciar sesión o registrarse. Por favor, inténtalo de nuevo.');
+      setError('Could not log in or register. Please try again.');
       console.error("Error during login/register", error); // Manejo del error
     }
   };
