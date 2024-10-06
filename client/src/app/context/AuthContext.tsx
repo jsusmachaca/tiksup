@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       setVideosWatched((prev) => prev + 1);
-      console.log(`Datos enviados con éxito ${res.data.message}`);
+      console.log(`Data sent successfully ${res.data.message}`);
 
       if (videosWatched >= 4) {
         await getVideos(true);
