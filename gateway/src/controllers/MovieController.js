@@ -7,11 +7,11 @@ export const getMovies = async (req, res) => {
   try {
     const authHeader = req.headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer'))
-      return res.status(401).send('Token no proporcionado')
+      return res.status(401).send('Token not provided')
 
     const token = authHeader.substring(7)
     const decodedToken = validateToken(token)
-    if (decodedToken === null) return res.status(401).json({ error: 'Token no valido' })
+    if (decodedToken === null) return res.status(401).json({ error: 'Invalid token' })
 
     const endpointURL = `${process.env.WORKER_URL}/user-info`
 

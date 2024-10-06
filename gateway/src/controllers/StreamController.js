@@ -10,12 +10,12 @@ export const postUserMovieData = async (req, res) => {
 
     const authHeader = req.headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer'))
-      return res.status(401).json({ error: 'Token no proporcionado' })
+      return res.status(401).json({ error: 'Token not provided' })
 
     const token = authHeader.substring(7)
     const decodedToken = validateToken(token)
     if (decodedToken === null)
-      return res.status(401).json({ error: 'Token no valido' })
+      return res.status(401).json({ error: 'Invalid token' })
 
     const { error, value } = streamDataSchema.validate({
       user_id: decodedToken.user_id,
@@ -86,10 +86,10 @@ export const postUserMovieData = async (req, res) => {
       messages: [{ value: mensajeString }]
     })
 
-    res.status(200).json({ message: 'Mensaje enviado a Kafka con éxito' })
+    res.status(200).json({ message: 'Message sent to Kafka successfully' })
   } catch (error) {
-    console.error('Error al enviar mensaje a Kafka:', error)
-    return res.status(500).json({ error: 'Error al enviar mensaje a Kafka' })
+    console.error('Error sending message to Kafka:', error)
+    return res.status(500).json({ error: 'Error sending message to Kafka' })
   }
 }
 

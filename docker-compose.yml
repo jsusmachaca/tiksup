@@ -93,6 +93,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - KAFKA_SERVER=${KAFKA_SERVER}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
       - WORKER_URL=${WORKER_URL}
       - GRPC_HOST=${GRPC_HOST}
       - PORT=${NODE_PORT}
@@ -100,4 +101,17 @@ services:
       - REDIS_PORT=${REDIS_PORT}
     restart: always
     ports:
-      - "3000:3000"
+      - "3005:3005"
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    environment:
+      - PORT=${PORT_NEXT}  
+      - NODE_URL={NODE_PORT}  
+    depends_on:
+      - gateway
+    restart: always
+    ports:
+      - "3000:3000"  

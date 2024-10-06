@@ -15,7 +15,7 @@ class SparkProcess:
                     .getOrCreate()
                 break
             except Exception:
-                print("Esperando a que Spark esté disponible...")
+                print("Waiting for Spark to be available...")
                 sleep(1)
 
         self.movie_schema = StructType([
