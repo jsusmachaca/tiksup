@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useEffect, useState, useContext } from 'react';
 import { useInView } from 'react-intersection-observer';
 import AuthContext from '../../context/AuthContext';
@@ -25,9 +27,11 @@ const VideoItem = ({ video }: VideoItemProps) => {
   const [hasSentData, setHasSentData] = useState(false);
 
   useEffect(() => {
+    const videoElement = videoRef.current;
+
     const handleTimeUpdate = () => {
-      if (videoRef.current) {
-        setWatchingTime(videoRef.current.currentTime);
+      if (videoElement) {
+        setWatchingTime(videoElement.currentTime);
       }
     };
 
@@ -35,15 +39,15 @@ const VideoItem = ({ video }: VideoItemProps) => {
       setWatchingRepeat((prev) => prev + 1);
     };
 
-    if (videoRef.current) {
-      videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
-      videoRef.current.addEventListener('ended', handleEnded);
+    if (videoElement) {
+      videoElement.addEventListener('timeupdate', handleTimeUpdate);
+      videoElement.addEventListener('ended', handleEnded);
     }
 
     return () => {
-      if (videoRef.current) {
-        videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
-        videoRef.current.removeEventListener('ended', handleEnded);
+      if (videoElement) {
+        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+        videoElement.removeEventListener('ended', handleEnded);
       }
     };
   }, []);

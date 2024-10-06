@@ -1,23 +1,19 @@
 "use client";
-
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import AuthContext from '../../context/AuthContext';
 import VideoItem from './VideoItem';
 
 const VideoList = () => {
   const authContext = useContext(AuthContext);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [userInteracted, setUserInteracted] = useState(false);
 
-  if (!authContext) {
-    return <div>Error: AuthContext not found</div>;
-  }
-
-  const { getVideos, videos } = authContext;
+  const { getVideos, videos = [] } = authContext || { getVideos: () => {}, videos: [] };
 
   useEffect(() => {
-    getVideos();
-  }, []);
+    if (getVideos) {
+      getVideos();
+    }
+  }, [getVideos]);
 
   const handleScroll = (direction: 'up' | 'down') => {
     const container = containerRef.current;
@@ -29,6 +25,10 @@ const VideoList = () => {
       });
     }
   };
+  
+  if (!authContext) {
+    return <div>Error: AuthContext not found</div>;
+  }
 
   if (videos.length === 0) {
     return <div>Loading videos...</div>;
@@ -39,7 +39,6 @@ const VideoList = () => {
       <div
         className="video-list h-full overflow-y-scroll snap-y snap-mandatory"
         ref={containerRef}
-        onClick={() => setUserInteracted(true)}
       >
         {videos.map((video, index) => (
           <VideoItem key={index} video={video} />

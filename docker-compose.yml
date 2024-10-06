@@ -101,4 +101,17 @@ services:
       - REDIS_PORT=${REDIS_PORT}
     restart: always
     ports:
-      - "3000:3000"
+      - "3005:3005"
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    environment:
+      - PORT=${PORT_NEXT}  
+      - NODE_URL={NODE_PORT}  
+    depends_on:
+      - gateway
+    restart: always
+    ports:
+      - "3000:3000"  
