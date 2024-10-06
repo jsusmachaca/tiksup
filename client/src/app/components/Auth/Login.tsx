@@ -31,8 +31,9 @@ const AuthForm = () => {
         await register(form.first_name, form.username, form.password);
         router.push('/videos');
       }
-    } catch (err) {
+    } catch (error) {
       setError('No se pudo iniciar sesión o registrarse. Por favor, inténtalo de nuevo.');
+      console.error("Error during login/register", error); // Manejo del error
     }
   };
 
@@ -45,23 +46,29 @@ const AuthForm = () => {
             type="text"
             name="first_name"
             placeholder="First Name"
+            value={form.first_name}
             onChange={handleChange}
             className="mb-4 p-2 border border-gray-300 rounded"
+            required
           />
         )}
         <input
           type="text"
           name="username"
           placeholder="Username"
+          value={form.username}
           onChange={handleChange}
           className="mb-4 p-2 border border-gray-300 rounded"
+          required
         />
         <input
           type="password"
           name="password"
           placeholder="Password"
+          value={form.password}
           onChange={handleChange}
           className="mb-4 p-2 border border-gray-300 rounded"
+          required
         />
         <button type="submit" className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
           {isLogin ? 'Login' : 'Register'}
