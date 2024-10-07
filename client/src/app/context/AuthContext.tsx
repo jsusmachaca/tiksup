@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, ReactNode } from 'react';
+import { createContext, useState, ReactNode, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../api/apiClient';
 import { AxiosError } from 'axios';
@@ -10,19 +10,6 @@ interface AuthContextProps {
   login: (username: string, password: string) => Promise<void>;
   register: (first_name: string, username: string, password: string) => Promise<void>;
   logout: () => void;
-  getVideos: () => Promise<void>;
-  sendVideoData: (video: VideoType, watchingTime: number, watchingRepeat: number) => Promise<void>;
-  videos: VideoType[];
-}
-
-interface VideoType {
-  id: string;
-  url: string;
-  title: string;
-  protagonist: string;
-  director: string;
-  genre: string[];
-  watching_repeat?: number;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -33,8 +20,6 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<{ username: string } | null>(null);
-  const [videos, setVideos] = useState<VideoType[]>([]);
-  const [videosWatched, setVideosWatched] = useState(1);
   const router = useRouter();
 
   const login = async (username: string, password: string) => {
@@ -84,6 +69,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     router.push('/login');
   };
 
+<<<<<<< HEAD
+=======
   const getVideos = async (append = false) => {
     try {
       const res = await api.get('/movies');
@@ -137,11 +124,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+>>>>>>> 489baa362f0a211f9efe53178191fa9705e868f7
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, getVideos, sendVideoData, videos }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
+  }
+  return context;
 };
 
 export default AuthContext;

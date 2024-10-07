@@ -1,18 +1,16 @@
 "use client";
-import { useContext, useEffect, useRef } from 'react';
-import AuthContext from '../../context/AuthContext';
+
+import { useEffect, useRef } from 'react';
+import { useVideoContext } from '../../context/VideoContext';
 import VideoItem from './VideoItem';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const VideoList = () => {
-  const authContext = useContext(AuthContext);
+  const { getVideos, videos } = useVideoContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { getVideos, videos = [] } = authContext || { getVideos: () => {}, videos: [] };
-
   useEffect(() => {
-    if (getVideos) {
-      getVideos();
-    }
+    getVideos().catch(error => console.error('Error fetching videos:', error));
   }, [getVideos]);
 
   const handleScroll = (direction: 'up' | 'down') => {
@@ -25,39 +23,39 @@ const VideoList = () => {
       });
     }
   };
-  
-  if (!authContext) {
-    return <div>Error: AuthContext not found</div>;
-  }
 
-  if (videos.length === 0) {
-    return <div>Loading videos...</div>;
+  if (!videos || videos.length === 0) {
+    return <div className="h-screen flex items-center justify-center text-white bg-black">Loading videos...</div>;
   }
 
   return (
-    <div className="relative h-screen overflow-hidden">
+    <div className="relative h-screen bg-black overflow-hidden">
       <div
         className="video-list h-full overflow-y-scroll snap-y snap-mandatory"
         ref={containerRef}
       >
         {videos.map((video, index) => (
-          <VideoItem key={index} video={video} />
+          <div key={index} className="snap-start h-screen flex items-center justify-center">
+            <VideoItem 
+            video={video} 
+            />
+          </div>
         ))}
       </div>
-      <div className="absolute top-1/2 left-0 transform -translate-y-1/2">
+      <div className="absolute top-4 right-4 z-10">
         <button
-          className="bg-gray-800 text-white p-2 rounded-full"
+          className="bg-gray-800 text-white p-2 rounded-full mb-2"
           onClick={() => handleScroll('up')}
         >
-          ↑
+          <ChevronUp className="w-6 h-6" />
         </button>
       </div>
-      <div className="absolute bottom-1/2 left-0 transform translate-y-1/2">
+      <div className="absolute bottom-4 right-4 z-10">
         <button
           className="bg-gray-800 text-white p-2 rounded-full"
           onClick={() => handleScroll('down')}
         >
-          ↓
+          <ChevronDown className="w-6 h-6" />
         </button>
       </div>
     </div>

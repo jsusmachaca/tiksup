@@ -3,22 +3,6 @@
 @tailwind utilities;
 
 
-.video-list {
-  @apply h-screen overflow-y-scroll snap-y snap-mandatory;
-}
-
-.video-item {
-  @apply h-screen snap-start flex items-center justify-center bg-black text-white relative;
-}
-
-.video-item video {
-  @apply w-full h-full object-cover;
-}
-
-.video-item h3, .video-item p {
-  @apply absolute bottom-0 left-0 p-4;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
