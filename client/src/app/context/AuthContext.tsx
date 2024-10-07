@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, ReactNode } from 'react';
+import { createContext, useState, ReactNode, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '../api/apiClient';
 import { AxiosError } from 'axios';
@@ -10,19 +10,6 @@ interface AuthContextProps {
   login: (username: string, password: string) => Promise<void>;
   register: (first_name: string, username: string, password: string) => Promise<void>;
   logout: () => void;
-  getVideos: () => Promise<void>;
-  sendVideoData: (video: VideoType, watchingTime: number, watchingRepeat: number) => Promise<void>;
-  videos: VideoType[];
-}
-
-interface VideoType {
-  id: string;
-  url: string;
-  title: string;
-  protagonist: string;
-  director: string;
-  genre: string[];
-  watching_repeat?: number;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -33,8 +20,6 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<{ username: string } | null>(null);
-  const [videos, setVideos] = useState<VideoType[]>([]);
-  const [videosWatched, setVideosWatched] = useState(1);
   const router = useRouter();
 
   const login = async (username: string, password: string) => {
@@ -84,64 +69,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     router.push('/login');
   };
 
-  const getVideos = async (append = false) => {
-    try {
-      const res = await api.get('/movies');
-      setVideos((prevVideos) => append ? [...prevVideos, ...res.data.movies] : res.data.movies);
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        console.error('Error fetching videos:', error.response?.data || error.message);
-      } else {
-        console.error('Unexpected error fetching videos:', error);
-      }
-    }
-  };
-
-  const sendVideoData = async (video: VideoType, watchingTime: number, watchingRepeat: number) => {
-    console.log(video.watching_repeat);
-    const roundedWatchingTime = parseFloat(watchingTime.toFixed(2));
-    const data = {
-      movie_id: video.id,
-      watching_time: roundedWatchingTime,
-      watching_repeat: watchingRepeat,
-      data: {
-        genre: video.genre,
-        protagonist: video.protagonist,
-        director: video.director,
-      },
-      next: videosWatched >= 4,
-    };
-
-    try {
-      const res = await api.post('/stream/sendmoviedata', data, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      setVideosWatched((prev) => prev + 1);
-      console.log(`Datos enviados con éxito ${res.data.message}`);
-
-      if (videosWatched >= 4) {
-        await getVideos(true);
-        setVideosWatched(1);
-        console.log('fetching for more movies');
-      }
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        console.error('Error sending video data:', error.response?.data || error.message);
-      } else {
-        console.error('Unexpected error sending video data:', error);
-      }
-    }
-  };
-
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, getVideos, sendVideoData, videos }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
+  }
+  return context;
 };
 
 export default AuthContext;
