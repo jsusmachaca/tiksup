@@ -69,6 +69,62 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     router.push('/login');
   };
 
+<<<<<<< HEAD
+=======
+  const getVideos = async (append = false) => {
+    try {
+      const res = await api.get('/movies');
+      setVideos((prevVideos) => append ? [...prevVideos, ...res.data.movies] : res.data.movies);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error('Error fetching videos:', error.response?.data || error.message);
+      } else {
+        console.error('Unexpected error fetching videos:', error);
+      }
+    }
+  };
+
+  const sendVideoData = async (video: VideoType, watchingTime: number, watchingRepeat: number) => {
+    console.log(video.watching_repeat);
+    const roundedWatchingTime = parseFloat(watchingTime.toFixed(2));
+    const data = {
+      movie_id: video.id,
+      watching_time: roundedWatchingTime,
+      watching_repeat: watchingRepeat,
+      data: {
+        genre: video.genre,
+        protagonist: video.protagonist,
+        director: video.director,
+      },
+      next: videosWatched >= 4,
+    };
+
+    try {
+      const res = await api.post('/stream/sendmoviedata', data, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      setVideosWatched((prev) => prev + 1);
+      console.log(`Data sent successfully ${res.data.message}`);
+
+      if (videosWatched >= 4) {
+        await getVideos(true);
+        setVideosWatched(1);
+        console.log('fetching for more movies');
+      }
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error('Error sending video data:', error.response?.data || error.message);
+      } else {
+        console.error('Unexpected error sending video data:', error);
+      }
+    }
+  };
+
+>>>>>>> 489baa362f0a211f9efe53178191fa9705e868f7
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
