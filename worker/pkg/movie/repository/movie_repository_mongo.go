@@ -18,7 +18,7 @@ func (movie *MongoRepository) GetMoviesExcludeHistory(history []primitive.Object
 	pipeline := mongo.Pipeline{
 		{{Key: "$match", Value: filter}},
 		{{Key: "$sample", Value: bson.D{
-			{Key: "size", Value: 6},
+			{Key: "size", Value: 15},
 		}}},
 	}
 
@@ -38,7 +38,7 @@ func (movie *MongoRepository) GetMoviesExcludeHistory(history []primitive.Object
 func (movie *MongoRepository) GetRadomMovies(movies any) error {
 	pipeline := mongo.Pipeline{
 		{{Key: "$sample", Value: bson.D{
-			{Key: "size", Value: 6},
+			{Key: "size", Value: 15},
 		}}},
 	}
 
