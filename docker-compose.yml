@@ -84,7 +84,7 @@ services:
       - postgres
     restart: always
     ports:
-      - "8081:8081"
+      - "${WORKER_PORT}:${WORKER_PORT}"
 
   gateway:
     build: ./gateway
@@ -92,26 +92,26 @@ services:
       - redis
     environment:
       - SECRET_KEY=${SECRET_KEY}
+      - PORT=${GATEWAY_PORT}
       - KAFKA_SERVER=${KAFKA_SERVER}
       - KAFKA_TOPIC=${KAFKA_TOPIC}
       - WORKER_URL=${WORKER_URL}
       - GRPC_HOST=${GRPC_HOST}
-      - PORT=${NODE_PORT}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
     restart: always
     ports:
-      - "3005:3005"
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
 
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
     environment:
-      - PORT=${PORT_NEXT}  
-      - NODE_URL={NODE_PORT}  
+      - PORT=${CLIENT_PORT}
+      - GATEWAY_URL={GATEWAY_URL} 
     depends_on:
       - gateway
     restart: always
     ports:
-      - "3000:3000"  
+      - "${CLIENT_PORT}:${CLIENT_PORT}"

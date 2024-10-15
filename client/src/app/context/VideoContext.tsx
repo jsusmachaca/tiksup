@@ -52,7 +52,7 @@ export const VideoProvider = ({ children }: VideoProviderProps) => {
         protagonist: video.protagonist,
         director: video.director,
       },
-      next: videosWatched >= 6
+      next: videosWatched >= 4
     };
 
     try {
