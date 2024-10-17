@@ -11,7 +11,7 @@ const VideoList = () => {
 
   useEffect(() => {
     getVideos().catch(error => console.error('Error fetching videos:', error));
-  }, [getVideos]);
+  }, []);
 
   const handleScroll = (direction: 'up' | 'down') => {
     const container = containerRef.current;

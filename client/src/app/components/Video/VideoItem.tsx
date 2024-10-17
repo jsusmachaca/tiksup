@@ -67,7 +67,6 @@ const VideoItem = ({ video }: VideoItemProps) => {
   }, []);
 
 
-  // se envian las 
   useEffect(() => {
     const videoElement = videoRef.current;
 
@@ -106,7 +105,7 @@ const VideoItem = ({ video }: VideoItemProps) => {
     const videoElement = videoRef.current;
     if (videoElement) {
       if (inView) {
-        videoElement.currentTime = 0; // Reset video to start when it comes into view
+        videoElement.currentTime = 0; 
         handlePlay();
       } else {
         handlePause();
