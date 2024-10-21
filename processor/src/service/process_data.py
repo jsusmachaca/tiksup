@@ -34,17 +34,35 @@ class SparkProcess:
         director_scores = user_preferences.get("preferences", {}).get("director_score", [])
         protagonist_scores = user_preferences.get("preferences", {}).get("protagonist_score", [])
 
-        genre_scores_df = self.spark.createDataFrame(
-            [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in genre_scores]
-        ).withColumnRenamed("score", "genre_score")
+        if not genre_scores:
+            genre_scores_df = self.spark.createDataFrame([], schema=StructType([
+                StructField("name", StringType(), True),
+                StructField("genre_score", StringType(), True)
+            ]))
+        else:
+            genre_scores_df = self.spark.createDataFrame(
+                [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in genre_scores]
+            ).withColumnRenamed("score", "genre_score")
 
-        director_scores_df = self.spark.createDataFrame(
-            [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in director_scores]
-        ).withColumnRenamed("score", "director_score")
+        if not director_scores:
+            director_scores_df = self.spark.createDataFrame([], schema=StructType([
+                StructField("name", StringType(), True),
+                StructField("director_score", StringType(), True)
+            ]))
+        else:
+            director_scores_df = self.spark.createDataFrame(
+                [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in director_scores]
+            ).withColumnRenamed("score", "director_score")
 
-        protagonist_scores_df = self.spark.createDataFrame(
-            [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in protagonist_scores]
-        ).withColumnRenamed("score", "protagonist_score")
+        if not protagonist_scores:
+            protagonist_scores_df = self.spark.createDataFrame([], schema=StructType([
+                StructField("name", StringType(), True),
+                StructField("protagonist_score", StringType(), True)
+            ]))
+        else:
+            protagonist_scores_df = self.spark.createDataFrame(
+                [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in protagonist_scores]
+            ).withColumnRenamed("score", "protagonist_score")
 
         recommendations_df = movies_df \
             .join(genre_scores_df, F.array_contains(movies_df.genre, genre_scores_df.name), "left") \
@@ -58,8 +76,15 @@ class SparkProcess:
             0.3 * F.coalesce(recommendations_df.protagonist_score, F.lit(0))
         )
 
-        sorted_recommendations_df = recommendations_df.filter(recommendations_df.combined_score > 0) \
-            .orderBy(F.desc("combined_score"))
+        recommendations_df = recommendations_df.withColumn(
+            "is_recommended",
+            F.when(recommendations_df.combined_score > 0, F.lit(1)).otherwise(F.lit(0))
+        )
+
+        recommendations_df = recommendations_df.dropDuplicates(["id"])
+
+        sorted_recommendations_df = recommendations_df \
+            .orderBy(F.desc("is_recommended"), F.desc("combined_score"))
 
         sorted_recommendations = sorted_recommendations_df.collect()
 
