@@ -29,16 +29,14 @@ const VideoList = () => {
   }
 
   return (
-    <div className="relative h-screen bg-black overflow-hidden">
+    <div className="relative h-[calc(100vh-64px)] bg-gray-100 overflow-hidden">
       <div
         className="video-list h-full overflow-y-scroll snap-y snap-mandatory"
         ref={containerRef}
       >
         {videos.map((video, index) => (
-          <div key={index} className="snap-start h-screen flex items-center justify-center">
-            <VideoItem 
-            video={video} 
-            />
+          <div key={index} className="snap-start h-full flex items-center justify-center">
+            <VideoItem video={video} />
           </div>
         ))}
       </div>
@@ -59,7 +57,7 @@ const VideoList = () => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default VideoList;
