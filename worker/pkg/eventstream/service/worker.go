@@ -20,7 +20,6 @@ func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB, mC modelKafka.MongoConn
 	if err != nil {
 		log.Fatalf("Kafka worker error: %v", err)
 	}
-
 	defer consumer.Close()
 
 	for {
