@@ -109,7 +109,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=${CLIENT_PORT}
-      - GATEWAY_URL={GATEWAY_URL} 
+      - GATEWAY_URL=${GATEWAY_URL}
     depends_on:
       - gateway
     restart: always
