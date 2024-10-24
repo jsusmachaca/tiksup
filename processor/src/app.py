@@ -4,6 +4,8 @@ from fastapi import FastAPI, BackgroundTasks
 from os import environ
 from dotenv import load_dotenv
 from .service import SparkProcess
+from .exceptions.exeptions import DataInsertionsError  
+
 
 load_dotenv()
 
@@ -21,18 +23,21 @@ async def hello_world():
     return {"message": "hello world"}
 
 def process_recommendation(user_preferences, movies) -> bool:
-    recommendations = spark.recommend_movies(user_preferences, movies)
+    try:
+        recommendations = spark.recommend_movies(user_preferences, movies)
 
-    if recommendations['user_id'] is None:
-        print("Warning: user_id is None, not storing in Redis")
-        return
+        if recommendations['user_id'] is None:
+            print("Warning: user_id is None, not storing in Redis")
+            return
 
-    result = redis_client.set(f"user:{recommendations['user_id']}:recommendations", json.dumps(recommendations))
-    
-    if result:
-        print("Stored in Redis")
-        return True
-    return False
+        result = redis_client.set(f"user:{recommendations['user_id']}:recommendations", json.dumps(recommendations))
+        
+        if result:
+            print("Stored in Redis")
+            return True
+        raise DataInsertionsError("Error to try insert data")
+    except DataInsertionsError as e:
+        print(e)
     
 @app.post("/recommend")
 async def receive_data(data: dict, background_tasks: BackgroundTasks):
