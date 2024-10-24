@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: process.env.GATEWAY_URL || 'http://localhost:3005',
+    baseURL: process.env.GATEWAY_URL || 'http://localhost:3000',
 });
 
 api.interceptors.request.use(
