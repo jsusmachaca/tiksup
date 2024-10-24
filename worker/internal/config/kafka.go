@@ -24,7 +24,7 @@ func KafKaConsumer(configMap *kafka.ConfigMap) (*kafka.Consumer, error) {
 	}
 
 	topic := os.Getenv("KAFKA_TOPIC")
-	err = consumer.Subscribe(topic, nil)
+	err = consumer.SubscribeTopics([]string{topic}, nil)
 	if err != nil {
 		return nil, err
 	}

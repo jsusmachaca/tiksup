@@ -25,8 +25,9 @@ func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB, mC modelKafka.MongoConn
 	for {
 		msg, err := consumer.ReadMessage(-1)
 		if err != nil {
-			log.Printf("Error to trying get kafka information: %v\n", err)
+			log.Printf("Error getting Kafka information: %v\n", err)
 		}
+
 		if err := json.Unmarshal(msg.Value, &kafkaData); err != nil {
 			log.Fatalf("Error to Unmarshall message: %v\n", err)
 		}
