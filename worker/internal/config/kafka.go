@@ -9,9 +9,11 @@ import (
 
 func KafkaConfig() kafka.ConfigMap {
 	configMap := kafka.ConfigMap{
-		"bootstrap.servers": os.Getenv("KAFKA_SERVER"),
-		"group.id":          "user-info-consumer",
-		"auto.offset.reset": "latest",
+		"bootstrap.servers":  os.Getenv("KAFKA_SERVER"),
+		"group.id":           "user-info-consumer",
+		"auto.offset.reset":  "latest",
+		"session.timeout.ms": 180000,
+		"request.timeout.ms": 600000,
 	}
 	return configMap
 }
