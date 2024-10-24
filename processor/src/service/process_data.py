@@ -35,15 +35,15 @@ class SparkProcess:
         protagonist_scores = user_preferences.get("preferences", {}).get("protagonist_score", [])
 
         genre_scores_df = self.spark.createDataFrame(
-            [{"name": item["name"], "score": item['score']} for item in genre_scores]
+            [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in genre_scores]
         ).withColumnRenamed("score", "genre_score")
 
         director_scores_df = self.spark.createDataFrame(
-            [{"name": item["name"], "score": item['score']} for item in director_scores]
+            [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in director_scores]
         ).withColumnRenamed("score", "director_score")
 
         protagonist_scores_df = self.spark.createDataFrame(
-            [{"name": item["name"], "score": item['score']} for item in protagonist_scores]
+            [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in protagonist_scores]
         ).withColumnRenamed("score", "protagonist_score")
 
         recommendations_df = movies_df \
