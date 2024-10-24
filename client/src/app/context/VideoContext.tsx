@@ -60,7 +60,7 @@ export const VideoProvider = ({ children }: VideoProviderProps) => {
       });
       setVideosWatched((prev) => prev + 1);
       console.log(`Datos enviados con éxito ${res.data.message}`);
-      if (videosWatched + 1 >= 4) {
+      if (videosWatched >= 4) {
         await getVideos(true);
         setVideosWatched(0);  
         console.log('Fetching more movies');
