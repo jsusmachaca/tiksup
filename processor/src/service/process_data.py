@@ -11,7 +11,7 @@ class SparkProcess:
             try:
                 self.spark = SparkSession.builder \
                     .appName("MyApp") \
-                    .master(f"spark://{environ.get("SPARK_HOST")}:{environ.get("SPARK_PORT")}") \
+                    .master(f"spark://{environ.get('SPARK_HOST')}:{environ.get('SPARK_PORT')}") \
                     .getOrCreate()
                 break
             except Exception:
@@ -34,40 +34,22 @@ class SparkProcess:
         director_scores = user_preferences.get("preferences", {}).get("director_score", [])
         protagonist_scores = user_preferences.get("preferences", {}).get("protagonist_score", [])
 
-        if not genre_scores:
-            genre_scores_df = self.spark.createDataFrame([], schema=StructType([
-                StructField("name", StringType(), True),
-                StructField("genre_score", StringType(), True)
-            ]))
-        else:
-            genre_scores_df = self.spark.createDataFrame(
-                [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in genre_scores]
-            ).withColumnRenamed("score", "genre_score")
+        genre_scores_df = self.spark.createDataFrame(
+            [{"name": item["name"], "score": item['score']} for item in genre_scores]
+        ).withColumnRenamed("score", "genre_score")
 
-        if not director_scores:
-            director_scores_df = self.spark.createDataFrame([], schema=StructType([
-                StructField("name", StringType(), True),
-                StructField("director_score", StringType(), True)
-            ]))
-        else:
-            director_scores_df = self.spark.createDataFrame(
-                [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in director_scores]
-            ).withColumnRenamed("score", "director_score")
+        director_scores_df = self.spark.createDataFrame(
+            [{"name": item["name"], "score": item['score']} for item in director_scores]
+        ).withColumnRenamed("score", "director_score")
 
-        if not protagonist_scores:
-            protagonist_scores_df = self.spark.createDataFrame([], schema=StructType([
-                StructField("name", StringType(), True),
-                StructField("protagonist_score", StringType(), True)
-            ]))
-        else:
-            protagonist_scores_df = self.spark.createDataFrame(
-                [{"name": item["name"], "score": f"{item['score']:.2f}"} for item in protagonist_scores]
-            ).withColumnRenamed("score", "protagonist_score")
+        protagonist_scores_df = self.spark.createDataFrame(
+            [{"name": item["name"], "score": item['score']} for item in protagonist_scores]
+        ).withColumnRenamed("score", "protagonist_score")
 
         recommendations_df = movies_df \
             .join(genre_scores_df, F.array_contains(movies_df.genre, genre_scores_df.name), "left") \
-            .join(director_scores_df, movies_df.director.contains(director_scores_df.name), "left") \
-            .join(protagonist_scores_df, movies_df.protagonist.contains(protagonist_scores_df.name), "left")
+            .join(director_scores_df, movies_df.director == director_scores_df.name, "left") \
+            .join(protagonist_scores_df, movies_df.protagonist == protagonist_scores_df.name, "left")
 
         recommendations_df = recommendations_df.withColumn(
             "combined_score",

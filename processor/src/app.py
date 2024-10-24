@@ -20,20 +20,32 @@ redis_client = redis.StrictRedis(
 async def hello_world():
     return {"message": "hello world"}
 
-def process_recommendation(user_preferences, movies):
+def process_recommendation(user_preferences, movies) -> bool:
     recommendations = spark.recommend_movies(user_preferences, movies)
-    redis_client.set(f"user:{user_preferences['user_id']}:recommendations",
-                     json.dumps(recommendations))
-    print("Stored in Redis")
 
+    if recommendations['user_id'] is None:
+        print("Warning: user_id is None, not storing in Redis")
+        return
+
+    result = redis_client.set(f"user:{recommendations['user_id']}:recommendations", json.dumps(recommendations))
+    
+    if result:
+        print("Stored in Redis")
+        return True
+    return False
+    
 @app.post("/recommend")
 async def receive_data(data: dict, background_tasks: BackgroundTasks):
+    user_id = str(data.get("user_id"))
+    if not user_id:
+        return {"error": "user_id is required."}
+
     user_preferences = {
-        "user_id": str(data.get("user_preferences", {}).get("user_id")),
+        "user_id": user_id,
         "preferences": {
-            "genre_score": data.get("user_preferences", {}).get("preferences", {}).get("genre_score", []),
-            "protagonist_score": data.get("user_preferences", {}).get("preferences", {}).get("protagonist_score", []),
-            "director_score": data.get("user_preferences", {}).get("preferences", {}).get("director_score", []),
+            "genre_score": data.get("preferences", {}).get("genre_score", []),
+            "protagonist_score": data.get("preferences", {}).get("protagonist_score", []),
+            "director_score": data.get("preferences", {}).get("director_score", []),
         }
     }
 
