@@ -12,8 +12,7 @@ func KafkaConfig() kafka.ConfigMap {
 		"bootstrap.servers":  os.Getenv("KAFKA_SERVER"),
 		"group.id":           "user-info-consumer",
 		"auto.offset.reset":  "latest",
-		"session.timeout.ms": 180000,
-		"request.timeout.ms": 600000,
+		"session.timeout.ms": 300000,
 	}
 	return configMap
 }
