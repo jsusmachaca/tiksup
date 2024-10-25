@@ -4,27 +4,30 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"strings"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/jsusmachaca/tiksup/api/middleware"
 	"github.com/jsusmachaca/tiksup/api/response"
-	"github.com/jsusmachaca/tiksup/internal/util"
 	"github.com/jsusmachaca/tiksup/pkg/movie"
 )
 
-func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	movie := movie.MovieRepository{DB: db}
+type GetUserInfo struct {
+	DB *sql.DB
+}
+
+type GetRandomMovies struct {
+	DB        *sql.DB
+	MongoConn movie.MongoConnection
+}
+
+func (h *GetUserInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	movie := movie.MovieRepository{DB: h.DB}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	token := r.Header.Get("Authorization")
-	if !strings.HasPrefix(token, "Bearer ") {
-		response.WriteJsonError(w, "Token not provided", http.StatusUnauthorized)
-		return
-	}
-	token = token[7:]
-	claims, err := util.ValidateToken(token)
-	if err != nil {
-		response.WriteJsonError(w, "Token is not valid", http.StatusUnauthorized)
+	claims, ok := r.Context().Value(middleware.TokenClaims).(jwt.MapClaims)
+	if !ok {
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -40,25 +43,18 @@ func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 }
 
-func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mongoConn movie.MongoConnection) {
-	movieMongo := mongoConn.ToRepository()
+func (h *GetRandomMovies) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	movieMongo := h.MongoConn.ToRepository()
 	var randomMovie []movie.Movie
 
 	w.Header().Set("Content-Type", "application/json")
 
-	token := r.Header.Get("Authorization")
-	if !strings.HasPrefix(token, "Bearer ") {
-		response.WriteJsonError(w, "Token not provided", http.StatusUnauthorized)
-		return
-	}
-	token = token[7:]
-	claims, err := util.ValidateToken(token)
-	if err != nil {
-		response.WriteJsonError(w, "Token is not valid", http.StatusUnauthorized)
-		return
+	claims, ok := r.Context().Value(middleware.TokenClaims).(jwt.MapClaims)
+	if !ok {
+		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 	}
 
-	err = movieMongo.GetRadomMovies(&randomMovie)
+	err := movieMongo.GetRadomMovies(&randomMovie)
 	if err != nil {
 		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/joho/godotenv"
 	"github.com/jsusmachaca/tiksup/api/handler"
+	"github.com/jsusmachaca/tiksup/api/middleware"
 	"github.com/jsusmachaca/tiksup/internal/config"
 	"github.com/jsusmachaca/tiksup/internal/database"
 	"github.com/jsusmachaca/tiksup/internal/service"
@@ -70,16 +71,15 @@ func main() {
 }
 
 func route(mux *http.ServeMux, db *sql.DB) {
+	userInfo := &handler.GetUserInfo{DB: db}
+	randomMovies := &handler.GetRandomMovies{DB: db, MongoConn: mC}
+
 	mux.HandleFunc("POST /api/login", func(w http.ResponseWriter, r *http.Request) {
 		handler.Login(w, r, db)
 	})
 	mux.HandleFunc("POST /api/register", func(w http.ResponseWriter, r *http.Request) {
 		handler.Register(w, r, db)
 	})
-	mux.HandleFunc("GET /user-info", func(w http.ResponseWriter, r *http.Request) {
-		handler.GetUserInfo(w, r, db)
-	})
-	mux.HandleFunc("GET /random-movies", func(w http.ResponseWriter, r *http.Request) {
-		handler.GetRandomMovies(w, r, db, mC)
-	})
+	mux.Handle("GET /user-info", middleware.AuthMiddleware(userInfo))
+	mux.Handle("GET /random-movies", middleware.AuthMiddleware(randomMovies))
 }
