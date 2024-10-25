@@ -1,4 +1,4 @@
-package repository
+package movie
 
 import (
 	"context"
@@ -11,6 +11,10 @@ import (
 type MongoRepository struct {
 	Collection *mongo.Collection
 	CTX        context.Context
+}
+
+func (conn *MongoConnection) ToRepository() MongoRepository {
+	return MongoRepository{Collection: conn.Collection, CTX: conn.CTX}
 }
 
 func (movie *MongoRepository) GetMoviesExcludeHistory(history []primitive.ObjectID, movies any) error {

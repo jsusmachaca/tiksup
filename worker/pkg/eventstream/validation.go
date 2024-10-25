@@ -1,4 +1,4 @@
-package validation
+package eventstream
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 

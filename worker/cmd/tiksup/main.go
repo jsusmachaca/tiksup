@@ -13,8 +13,8 @@ import (
 	"github.com/jsusmachaca/tiksup/api/handler"
 	"github.com/jsusmachaca/tiksup/internal/config"
 	"github.com/jsusmachaca/tiksup/internal/database"
-	"github.com/jsusmachaca/tiksup/pkg/eventstream/model"
-	kafkaService "github.com/jsusmachaca/tiksup/pkg/eventstream/service"
+	"github.com/jsusmachaca/tiksup/internal/service"
+	"github.com/jsusmachaca/tiksup/pkg/movie"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -23,13 +23,16 @@ var (
 	configMap  kafka.ConfigMap
 	ctx        = context.TODO()
 	db         *sql.DB
-	mC         model.MongoConnection
+	mC         movie.MongoConnection
+	client     *http.Client
 )
 
 func init() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("\033[31mNot .env file found. Using system variables\033[0m")
 	}
+
+	client = &http.Client{}
 
 	configMap = config.KafkaConfig()
 
@@ -47,11 +50,11 @@ func init() {
 	if err != nil {
 		log.Fatalf("Error trying to connect to mongo: %v", err)
 	}
-	mC = model.MongoConnection{Collection: collection, CTX: ctx}
+	mC = movie.MongoConnection{Collection: collection, CTX: ctx}
 }
 
 func main() {
-	go kafkaService.KafkaWorker(&configMap, db, mC)
+	go service.KafkaWorker(client, &configMap, db, mC)
 
 	mux := http.NewServeMux()
 	route(mux, db)

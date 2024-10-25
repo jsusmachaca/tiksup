@@ -4,17 +4,17 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"net/http"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/jsusmachaca/tiksup/internal/config"
-	modelKafka "github.com/jsusmachaca/tiksup/pkg/eventstream/model"
-	"github.com/jsusmachaca/tiksup/pkg/eventstream/repository"
-	movieService "github.com/jsusmachaca/tiksup/pkg/movie/service"
+	"github.com/jsusmachaca/tiksup/pkg/eventstream"
+	"github.com/jsusmachaca/tiksup/pkg/movie"
 )
 
-func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB, mC modelKafka.MongoConnection) error {
-	var kafkaData modelKafka.KafkaData
-	kafaDB := repository.KafkaRepository{DB: db}
+func KafkaWorker(client *http.Client, configMap *kafka.ConfigMap, db *sql.DB, mC movie.MongoConnection) error {
+	var kafkaData eventstream.KafkaData
+	kafaDB := eventstream.KafkaRepository{DB: db}
 
 	consumer, err := config.KafKaConsumer(configMap)
 	if err != nil {
@@ -36,7 +36,7 @@ func KafkaWorker(configMap *kafka.ConfigMap, db *sql.DB, mC modelKafka.MongoConn
 			log.Printf("Error to insert kafka information: %v\n", err)
 		}
 		if kafkaData.Next {
-			go movieService.MovieWorker(db, kafkaData, mC)
+			go MovieWorker(client, db, kafkaData, mC)
 		}
 	}
 }

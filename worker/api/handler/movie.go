@@ -8,13 +8,11 @@ import (
 
 	"github.com/jsusmachaca/tiksup/api/response"
 	"github.com/jsusmachaca/tiksup/internal/util"
-	"github.com/jsusmachaca/tiksup/pkg/eventstream/model"
-	movieModel "github.com/jsusmachaca/tiksup/pkg/movie/model"
-	"github.com/jsusmachaca/tiksup/pkg/movie/repository"
+	"github.com/jsusmachaca/tiksup/pkg/movie"
 )
 
 func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	movie := repository.MovieRository{DB: db}
+	movie := movie.MovieRepository{DB: db}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -42,9 +40,9 @@ func GetUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 }
 
-func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mC model.MongoConnection) {
-	movieMongo := repository.MongoRepository{Collection: mC.Collection, CTX: mC.CTX}
-	var randomMovie []movieModel.Movie
+func GetRandomMovies(w http.ResponseWriter, r *http.Request, db *sql.DB, mongoConn movie.MongoConnection) {
+	movieMongo := mongoConn.ToRepository()
+	var randomMovie []movie.Movie
 
 	w.Header().Set("Content-Type", "application/json")
 

@@ -1,8 +1,8 @@
 package response
 
-import "github.com/jsusmachaca/tiksup/pkg/movie/model"
+import "github.com/jsusmachaca/tiksup/pkg/movie"
 
 type RandoMovie struct {
 	UserID string        `json:"user_id"`
-	Movies []model.Movie `json:"movies"`
+	Movies []movie.Movie `json:"movies"`
 }

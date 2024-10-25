@@ -7,19 +7,17 @@ import (
 
 	"github.com/jsusmachaca/tiksup/api/response"
 	"github.com/jsusmachaca/tiksup/internal/util"
-	modelUser "github.com/jsusmachaca/tiksup/pkg/auth/model"
-	userRepository "github.com/jsusmachaca/tiksup/pkg/auth/repository"
-	"github.com/jsusmachaca/tiksup/pkg/auth/validation"
+	"github.com/jsusmachaca/tiksup/pkg/auth"
 )
 
 func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer r.Body.Close()
-	user := userRepository.UserRepository{DB: db}
+	user := auth.UserRepository{DB: db}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var body modelUser.User
-	if err := validation.UserValidation(r.Body, &body); err != nil {
+	var body auth.User
+	if err := auth.UserValidation(r.Body, &body); err != nil {
 		response.WriteJsonError(w, "Invalid data", http.StatusBadRequest)
 		return
 	}
@@ -46,12 +44,12 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	defer r.Body.Close()
-	user := userRepository.UserRepository{DB: db}
+	user := auth.UserRepository{DB: db}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var body modelUser.User
-	if err := validation.UserValidation(r.Body, &body); err != nil {
+	var body auth.User
+	if err := auth.UserValidation(r.Body, &body); err != nil {
 		response.WriteJsonError(w, "Invalid data", http.StatusBadRequest)
 		return
 	}

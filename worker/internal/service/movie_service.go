@@ -5,21 +5,22 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"net/http"
 
-	"github.com/jsusmachaca/tiksup/pkg/eventstream/model"
-	"github.com/jsusmachaca/tiksup/pkg/movie/repository"
+	"github.com/jsusmachaca/tiksup/pkg/eventstream"
+	"github.com/jsusmachaca/tiksup/pkg/movie"
 )
 
-func MovieWorker(db *sql.DB, kafkaData model.KafkaData, mC model.MongoConnection) {
-	movie := repository.MovieRository{DB: db}
-	mongoMovie := repository.MongoRepository{Collection: mC.Collection, CTX: mC.CTX}
+func MovieWorker(client *http.Client, db *sql.DB, kafkaData eventstream.KafkaData, mongoConn movie.MongoConnection) {
+	movieRepository := movie.MovieRepository{DB: db}
+	mongoMovie := mongoConn.ToRepository()
 
 	user_id := kafkaData.UserID
-	recomendation, err := movie.GetPreferences(user_id)
+	recomendation, err := movieRepository.GetPreferences(user_id)
 	if err != nil {
 		log.Fatal(err)
 	}
-	history, err := movie.GetHistory(user_id)
+	history, err := movieRepository.GetHistory(user_id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +36,7 @@ func MovieWorker(db *sql.DB, kafkaData model.KafkaData, mC model.MongoConnection
 	}
 	bodyReader := bytes.NewReader(body)
 
-	err = ApiService(bodyReader)
+	err = movie.ApiService(client, bodyReader)
 	if err != nil {
 		log.Fatal(err)
 	}
