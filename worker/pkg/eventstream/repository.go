@@ -37,7 +37,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data KafkaData) error {
 		(preference_id, name, score) 
 		VALUES ($1, $2, $3)
 		ON CONFLICT (preference_id, name)
-		DO UPDATE SET score = EXCLUDED.score;`
+		DO UPDATE SET score = genre_score.score + EXCLUDED.score;`
 	stmtGenre, err := tx.Prepare(queryGenre)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data KafkaData) error {
 			(preference_id, name, score) 
 			VALUES ($1, $2, $3)
 			ON CONFLICT (preference_id, name)
-			DO UPDATE SET score = EXCLUDED.score;`
+			DO UPDATE SET score = protagonist_score.score + EXCLUDED.score;`
 	stmtProtagonist, err := tx.Prepare(queryProtagonist)
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data KafkaData) error {
 			(preference_id, name, score) 
 			VALUES ($1, $2, $3)
 			ON CONFLICT (preference_id, name)
-			DO UPDATE SET score = EXCLUDED.score;`
+			DO UPDATE SET score = director_score.score + EXCLUDED.score;`
 	stmtDirector, err := tx.Prepare(queryDirector)
 	if err != nil {
 		return err

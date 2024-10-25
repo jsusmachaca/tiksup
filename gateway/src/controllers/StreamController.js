@@ -1,7 +1,6 @@
 import { producer } from '../config/kafka.js'
 import { streamDataSchema } from '../schemas/StreamDataSchema.js'
 import { validateToken } from '../config/jwt.js'
-import axios from 'axios'
 import 'dotenv/config'
 
 export const postUserMovieData = async (req, res) => {
@@ -32,44 +31,21 @@ export const postUserMovieData = async (req, res) => {
       })
     }
 
-    const endpointURL = `${process.env.WORKER_URL}/user-info`
-
-    const response = await axios.get(endpointURL, {
-      headers: {
-        Authorization: authHeader
-      }
-    })
-
-    const preferencesResponse = response.data.preferences
+    let preferences = {
+      genre_score: [],
+      protagonist_score: { name: "", score: 0.0 },
+      director_score: { name: "", score: 0.0 }
+    };
 
     data.genre.forEach(genre => {
-      const found = preferencesResponse.genre_score.find(g => g.name === genre)
-      if (found) {
-        found.score += calculateScore(watching_time, watching_repeat)
-      } else {
-        preferencesResponse.genre_score.push({ name: genre, score: calculateScore(watching_time, watching_repeat) })
-      }
+      preferences.genre_score.push({ name: genre, score: calculateScore(watching_time, watching_repeat) })
     })
 
-    let protagonistFound = preferencesResponse.protagonist_score.find(p => p.name === data.protagonist)
-    if (protagonistFound) {
-      protagonistFound.score += calculateScore(watching_time, watching_repeat)
-    } else {
-      protagonistFound = { name: data.protagonist, score: calculateScore(watching_time, watching_repeat) }
-    }
+    preferences.protagonist_score.name = data.protagonist
+    preferences.protagonist_score.score = calculateScore(watching_time, watching_repeat)
 
-    let directorFound = preferencesResponse.director_score.find(d => d.name === data.director)
-    if (directorFound) {
-      directorFound.score += calculateScore(watching_time, watching_repeat)
-    } else {
-      directorFound = { name: data.director, score: calculateScore(watching_time, watching_repeat) }
-    }
-
-    const preferences = {
-      genre_score: preferencesResponse.genre_score,
-      protagonist_score: protagonistFound,
-      director_score: directorFound
-    }
+    preferences.director_score.name = data.director
+    preferences.director_score.score = calculateScore(watching_time, watching_repeat)
 
     const mensajeJson = {
       user_id: decodedToken.user_id,
@@ -100,6 +76,8 @@ const calculateScore = (watching_time, watching_repeat) => {
   } else if (watching_time >= 10) {
     score += 0.5
   } else if (watching_time < 5) {
+    score -= 1.0
+  } else {
     score -= 0.5
   }
 

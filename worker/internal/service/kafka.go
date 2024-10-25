@@ -33,7 +33,7 @@ func KafkaWorker(client *http.Client, configMap *kafka.ConfigMap, db *sql.DB, mC
 		}
 
 		if err := kafaDB.UpdateUserInfo(kafkaData); err != nil {
-			log.Printf("Error to insert kafka information: %v\n", err)
+			log.Printf("Error to insert kafka information on database: %v\n", err)
 		}
 		if kafkaData.Next {
 			go MovieWorker(client, db, kafkaData, mC)
