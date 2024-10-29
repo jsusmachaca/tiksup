@@ -2,10 +2,9 @@ package handler
 
 import (
 	"database/sql"
-	"encoding/json"
 	"net/http"
 
-	"github.com/jsusmachaca/tiksup/api/response"
+	"github.com/jsusmachaca/go-router/pkg/response"
 	"github.com/jsusmachaca/tiksup/internal/util"
 	"github.com/jsusmachaca/tiksup/pkg/auth"
 )
@@ -25,28 +24,25 @@ func (h *Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var body auth.User
 	if err := auth.UserValidation(r.Body, &body); err != nil {
-		response.WriteJsonError(w, "Invalid data", http.StatusBadRequest)
+		response.JsonErrorFromString(w, "Invalid data", http.StatusBadRequest)
 		return
 	}
 
 	data, err := user.GetUser(body)
 	if err != nil {
-		response.WriteJsonError(w, "Invalid username or password", http.StatusUnauthorized)
+		response.JsonErrorFromString(w, "Invalid username or password", http.StatusUnauthorized)
 		return
 	}
 
 	token, err := util.CreateToken(data.ID, data.Username)
 	if err != nil {
-		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
+		response.JsonErrorFromString(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(map[string]string{
+	response.JsonResponse(w, map[string]string{
 		"access_token": token,
-	}); err != nil {
-		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	}, 200)
 }
 
 func (h Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -57,19 +53,19 @@ func (h Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var body auth.User
 	if err := auth.UserValidation(r.Body, &body); err != nil {
-		response.WriteJsonError(w, "Invalid data", http.StatusBadRequest)
+		response.JsonErrorFromString(w, "Invalid data", http.StatusBadRequest)
 		return
 	}
 
 	err := user.InsertUser(body)
 	if err != nil {
-		response.WriteJsonError(w, "Error registering user", http.StatusInternalServerError)
+		response.JsonErrorFromString(w, "Error registering user", http.StatusInternalServerError)
 		return
 	}
 
 	err = user.CreatePreference(body)
 	if err != nil {
-		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
+		response.JsonErrorFromString(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -78,8 +74,5 @@ func (h Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		"username":   body.Username,
 		"password":   body.Password,
 	}
-	if err := json.NewEncoder(w).Encode(successResponse); err != nil {
-		response.WriteJsonError(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	response.JsonResponse(w, successResponse, 200)
 }

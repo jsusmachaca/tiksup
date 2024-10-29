@@ -41,13 +41,13 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/joho/godotenv"
+	"github.com/jsusmachaca/go-router/pkg/router"
 	"github.com/jsusmachaca/tiksup/api/handler"
 	"github.com/jsusmachaca/tiksup/api/middleware"
 	"github.com/jsusmachaca/tiksup/internal/config"
 	"github.com/jsusmachaca/tiksup/internal/database"
 	"github.com/jsusmachaca/tiksup/internal/service"
 	"github.com/jsusmachaca/tiksup/pkg/movie"
-	"github.com/jsusmachaca/tiksup/pkg/router"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

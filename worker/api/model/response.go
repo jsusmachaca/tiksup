@@ -1,4 +1,4 @@
-package response
+package model
 
 import "github.com/jsusmachaca/tiksup/pkg/movie"
 
