@@ -10,9 +10,16 @@ import (
 	"github.com/jsusmachaca/tiksup/pkg/auth"
 )
 
-func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+type Login struct {
+	DB *sql.DB
+}
+type Register struct {
+	DB *sql.DB
+}
+
+func (h *Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	user := auth.UserRepository{DB: db}
+	user := &auth.UserRepository{DB: h.DB}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -42,9 +49,9 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 }
 
-func Register(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func (h Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	user := auth.UserRepository{DB: db}
+	user := &auth.UserRepository{DB: h.DB}
 
 	w.Header().Set("Content-Type", "application/json")
 

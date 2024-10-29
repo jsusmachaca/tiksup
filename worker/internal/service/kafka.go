@@ -14,7 +14,7 @@ import (
 
 func KafkaWorker(client *http.Client, configMap *kafka.ConfigMap, db *sql.DB, mC movie.MongoConnection) error {
 	var kafkaData eventstream.KafkaData
-	kafaDB := eventstream.KafkaRepository{DB: db}
+	kafaDB := &eventstream.KafkaRepository{DB: db}
 
 	consumer, err := config.KafKaConsumer(configMap)
 	if err != nil {

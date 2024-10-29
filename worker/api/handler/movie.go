@@ -21,7 +21,7 @@ type GetRandomMovies struct {
 }
 
 func (h *GetUserInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	movie := movie.MovieRepository{DB: h.DB}
+	movie := &movie.MovieRepository{DB: h.DB}
 
 	w.Header().Set("Content-Type", "application/json")
 

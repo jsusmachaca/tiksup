@@ -12,7 +12,7 @@ import (
 )
 
 func MovieWorker(client *http.Client, db *sql.DB, kafkaData eventstream.KafkaData, mongoConn movie.MongoConnection) {
-	movieRepository := movie.MovieRepository{DB: db}
+	movieRepository := &movie.MovieRepository{DB: db}
 	mongoMovie := mongoConn.ToRepository()
 
 	user_id := kafkaData.UserID

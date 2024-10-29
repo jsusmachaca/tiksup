@@ -47,6 +47,7 @@ import (
 	"github.com/jsusmachaca/tiksup/internal/database"
 	"github.com/jsusmachaca/tiksup/internal/service"
 	"github.com/jsusmachaca/tiksup/pkg/movie"
+	"github.com/jsusmachaca/tiksup/pkg/router"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -88,29 +89,24 @@ func init() {
 func main() {
 	go service.KafkaWorker(client, &configMap, db, mongoConn)
 
-	mux := http.NewServeMux()
-	route(mux, db)
+	router := router.NewRouter()
+
+	userInfo := &handler.GetUserInfo{DB: db}
+	randomMovies := &handler.GetRandomMovies{DB: db, MongoConn: mongoConn}
+	login := &handler.Login{DB: db}
+	register := &handler.Register{DB: db}
+
+	router.Post("/api/login", nil, login)
+	router.Post("/api/register", nil, register)
+	router.Get("/user-info", middleware.AuthMiddleware, userInfo)
+	router.Get("/random/movies", middleware.AuthMiddleware, randomMovies)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", os.Getenv("PORT")),
-		Handler: mux,
+		Handler: router.ServeMux,
 	}
 	fmt.Printf("Server listen on http://localhost%s\n", server.Addr)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Error to initialize server %v", err)
 	}
-}
-
-func route(mux *http.ServeMux, db *sql.DB) {
-	userInfo := &handler.GetUserInfo{DB: db}
-	randomMovies := &handler.GetRandomMovies{DB: db, MongoConn: mongoConn}
-
-	mux.HandleFunc("POST /api/login", func(w http.ResponseWriter, r *http.Request) {
-		handler.Login(w, r, db)
-	})
-	mux.HandleFunc("POST /api/register", func(w http.ResponseWriter, r *http.Request) {
-		handler.Register(w, r, db)
-	})
-	mux.Handle("GET /user-info", middleware.AuthMiddleware(userInfo))
-	mux.Handle("GET /random-movies", middleware.AuthMiddleware(randomMovies))
 }
