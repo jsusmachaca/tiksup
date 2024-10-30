@@ -12,7 +12,7 @@ type KafkaRepository struct {
 }
 
 func (kafka *KafkaRepository) UpdateUserInfo(data KafkaData) error {
-	auth := auth.UserRepository{DB: kafka.DB}
+	auth := &auth.UserRepository{DB: kafka.DB}
 
 	preferenceID, err := auth.GetPreferenceID(data.UserID)
 	if err != nil {

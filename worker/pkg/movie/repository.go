@@ -20,7 +20,7 @@ func (movie *MovieRepository) GetPreferences(user_id string) (MovieRemmendation,
 		ProtagonistScore: []ProtagonistScore{},
 		DirectorScore:    []DirectorScore{},
 	}
-	user := auth.UserRepository{DB: movie.DB}
+	user := &auth.UserRepository{DB: movie.DB}
 
 	preferenceID, err := user.GetPreferenceID(user_id)
 	if err != nil {

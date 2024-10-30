@@ -41,7 +41,6 @@ func (h *GetUserInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		response.JsonErrorFromString(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-
 }
 
 func (h *GetRandomMovies) ServeHTTP(w http.ResponseWriter, r *http.Request) {
