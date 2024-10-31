@@ -1,4 +1,18 @@
 services:
+  zookeeper:
+    image: mcjesus/zookeeper:alpine1.0
+
+  kafka:
+    image: mcjesus/kafka:alpine1.0
+    environment:
+      - ZOOKEEPER_SERVER=zookeeper
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ADVERTISED_LISTENER=localhost
+    ports:
+      - "9092:9092"
+    command: >
+      /kafka_2.13-3.8.0/bin/kafka-topics.sh --create --bootstrap-server kafka --topic tiksup-user-data
+
   redis:
     image: redis:7.4.0-alpine
     ports:
