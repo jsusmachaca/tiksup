@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN npm i
 
 COPY . .
 
@@ -13,5 +13,3 @@ RUN npm run build
 EXPOSE 3000
 
 ENTRYPOINT ["npm", "start"]
-
-

@@ -1,20 +1,18 @@
-package repository
+package eventstream
 
 import (
 	"database/sql"
 	"log"
 
-	authRepository "github.com/jsusmachaca/tiksup/pkg/auth/repository"
-	"github.com/jsusmachaca/tiksup/pkg/eventstream/model"
-	"github.com/jsusmachaca/tiksup/pkg/eventstream/validation"
+	"github.com/jsusmachaca/tiksup/pkg/auth"
 )
 
 type KafkaRepository struct {
 	DB *sql.DB
 }
 
-func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
-	auth := authRepository.UserRepository{DB: kafka.DB}
+func (kafka *KafkaRepository) UpdateUserInfo(data KafkaData) error {
+	auth := &auth.UserRepository{DB: kafka.DB}
 
 	preferenceID, err := auth.GetPreferenceID(data.UserID)
 	if err != nil {
@@ -39,7 +37,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 		(preference_id, name, score) 
 		VALUES ($1, $2, $3)
 		ON CONFLICT (preference_id, name)
-		DO UPDATE SET score = EXCLUDED.score;`
+		DO UPDATE SET score = genre_score.score + EXCLUDED.score;`
 	stmtGenre, err := tx.Prepare(queryGenre)
 	if err != nil {
 		return err
@@ -59,7 +57,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 			(preference_id, name, score) 
 			VALUES ($1, $2, $3)
 			ON CONFLICT (preference_id, name)
-			DO UPDATE SET score = EXCLUDED.score;`
+			DO UPDATE SET score = protagonist_score.score + EXCLUDED.score;`
 	stmtProtagonist, err := tx.Prepare(queryProtagonist)
 	if err != nil {
 		return err
@@ -81,7 +79,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 			(preference_id, name, score) 
 			VALUES ($1, $2, $3)
 			ON CONFLICT (preference_id, name)
-			DO UPDATE SET score = EXCLUDED.score;`
+			DO UPDATE SET score = director_score.score + EXCLUDED.score;`
 	stmtDirector, err := tx.Prepare(queryDirector)
 	if err != nil {
 		return err
@@ -109,7 +107,7 @@ func (kafka *KafkaRepository) UpdateUserInfo(data model.KafkaData) error {
 	}
 	defer stmtHistory.Close()
 
-	movie_id := validation.IsValidObjectID(data.MovieID)
+	movie_id := IsValidObjectID(data.MovieID)
 	_, err = stmtHistory.Exec(data.UserID, movie_id)
 	if err != nil {
 		log.Println(err)

@@ -1,6 +1,16 @@
-package model
+package movie
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type MongoConnection struct {
+	Collection *mongo.Collection
+	CTX        context.Context
+}
 
 type Movie struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`

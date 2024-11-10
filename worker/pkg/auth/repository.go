@@ -1,12 +1,10 @@
-package repository
+package auth
 
 import (
 	"database/sql"
 	"errors"
 	"log"
 
-	userModel "github.com/jsusmachaca/tiksup/pkg/auth/model"
-	"github.com/jsusmachaca/tiksup/pkg/auth/validation"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,7 +12,7 @@ type UserRepository struct {
 	DB *sql.DB
 }
 
-func (user *UserRepository) InsertUser(data userModel.User) error {
+func (user *UserRepository) InsertUser(data User) error {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -40,14 +38,14 @@ func (user *UserRepository) InsertUser(data userModel.User) error {
 		return err
 	}
 	if i != 1 {
-		return validation.ErrRowsAffected
+		return ErrRowsAffected
 	}
 	log.Println("user inserted success")
 	return nil
 }
 
-func (user *UserRepository) GetUser(data userModel.User) (userModel.User, error) {
-	var userData userModel.User
+func (user *UserRepository) GetUser(data User) (User, error) {
+	var userData User
 
 	query := `SELECT id, username, password
 	FROM users WHERE username=$1;`
@@ -58,7 +56,7 @@ func (user *UserRepository) GetUser(data userModel.User) (userModel.User, error)
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return userData, validation.ErrIncorrectCredentials
+			return userData, ErrIncorrectCredentials
 		}
 		log.Println("Error querying for user:", err)
 		return userData, err
@@ -66,20 +64,20 @@ func (user *UserRepository) GetUser(data userModel.User) (userModel.User, error)
 
 	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(data.Password))
 	if err != nil {
-		return userData, validation.ErrIncorrectCredentials
+		return userData, ErrIncorrectCredentials
 	}
 
 	return userData, nil
 }
 
-func (user *UserRepository) CreatePreference(data userModel.User) error {
-	var userData userModel.User
+func (user *UserRepository) CreatePreference(data User) error {
+	var userData User
 
 	query := `SELECT id FROM users WHERE username=$1;`
 	err := user.DB.QueryRow(query, data.Username).Scan(&userData.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return validation.ErrObteinData
+			return ErrObteinData
 		}
 		log.Println("Error querying user ID:", err)
 		return err
@@ -103,7 +101,7 @@ func (user *UserRepository) CreatePreference(data userModel.User) error {
 }
 
 func (user *UserRepository) GetPreferenceID(user_id string) (string, error) {
-	var preference userModel.Preference
+	var preference Preference
 
 	query := `SELECT id
 	FROM preference WHERE user_id=$1;`
@@ -112,7 +110,7 @@ func (user *UserRepository) GetPreferenceID(user_id string) (string, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", validation.ErrNoPreferencesFound
+			return "", ErrNoPreferencesFound
 		}
 		log.Println("Error querying for user:", err)
 		return "", err

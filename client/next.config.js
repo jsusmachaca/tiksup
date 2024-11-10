@@ -2,7 +2,10 @@
 
 const nextConfig = {
   env: {
-    NODE_URL: process.env.NODE_URL,
+    GATEWAY_URL: process.env.GATEWAY_URL,
+  },
+  images: {
+    domains: ['gqldqjebnxaxmslrgqwf.supabase.co'],
   },
 };
 

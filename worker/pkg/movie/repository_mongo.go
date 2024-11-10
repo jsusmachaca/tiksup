@@ -1,4 +1,4 @@
-package repository
+package movie
 
 import (
 	"context"
@@ -13,12 +13,16 @@ type MongoRepository struct {
 	CTX        context.Context
 }
 
+func (conn *MongoConnection) ToRepository() MongoRepository {
+	return MongoRepository{Collection: conn.Collection, CTX: conn.CTX}
+}
+
 func (movie *MongoRepository) GetMoviesExcludeHistory(history []primitive.ObjectID, movies any) error {
 	filter := bson.M{"_id": bson.M{"$nin": history}}
 	pipeline := mongo.Pipeline{
 		{{Key: "$match", Value: filter}},
 		{{Key: "$sample", Value: bson.D{
-			{Key: "size", Value: 6},
+			{Key: "size", Value: 15},
 		}}},
 	}
 
@@ -38,7 +42,7 @@ func (movie *MongoRepository) GetMoviesExcludeHistory(history []primitive.Object
 func (movie *MongoRepository) GetRadomMovies(movies any) error {
 	pipeline := mongo.Pipeline{
 		{{Key: "$sample", Value: bson.D{
-			{Key: "size", Value: 6},
+			{Key: "size", Value: 15},
 		}}},
 	}
 

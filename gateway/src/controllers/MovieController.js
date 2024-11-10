@@ -41,7 +41,9 @@ export const getMovies = async (req, res) => {
 
       return res.json(randomMovies.data)
     }
-
+    if (recommendations) {
+      console.log('extracted data from redis database')
+    }
     res.json(recommendations)
   } catch (err) {
     res.status(500).send('Error: ' + err.message)
