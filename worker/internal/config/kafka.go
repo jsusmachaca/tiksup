@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -8,8 +9,13 @@ import (
 )
 
 func KafkaConfig() kafka.ConfigMap {
+	server := os.Getenv("KAFKA_SERVER")
+	topic := os.Getenv("KAFKA_TOPIC")
+	fmt.Printf("Kafka Server: %s\n", server)
+	fmt.Printf("Kafka Topic: %s\n", topic)
+
 	configMap := kafka.ConfigMap{
-		"bootstrap.servers":  os.Getenv("KAFKA_SERVER"),
+		"bootstrap.servers":  server,
 		"group.id":           "user-info-consumer",
 		"auto.offset.reset":  "latest",
 		"session.timeout.ms": 300000,
