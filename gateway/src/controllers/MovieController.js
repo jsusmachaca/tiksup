@@ -31,7 +31,7 @@ export const getMovies = async (req, res) => {
     ) {
       console.log('Using random data')
 
-      const endpointURL = `${process.env.WORKER_URL}/random-movies`
+      const endpointURL = `${process.env.WORKER_URL}/random/movies`
 
       const randomMovies = await axios.get(endpointURL, {
         headers: {
