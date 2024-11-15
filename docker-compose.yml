@@ -1,17 +1,48 @@
+
 services:
   zookeeper:
-    image: mcjesus/zookeeper:alpine1.0
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka-net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 2181 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
-    image: mcjesus/kafka:alpine1.0
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
     environment:
-      - ZOOKEEPER_SERVER=zookeeper
-      - KAFKA_BROKER_ID=1
-      - KAFKA_ADVERTISED_LISTENER=localhost
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
+    networks:
+      - kafka-net
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --list --bootstrap-server localhost:9092 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     command: >
-      /kafka_2.13-3.8.0/bin/kafka-topics.sh --create --bootstrap-server kafka --topic tiksup-user-data
+      sh -c "/etc/confluent/docker/run &&
+      sleep 10 &&
+      kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic tiksup &&
+      tail -f /dev/null"
+
 
   redis:
     image: redis:7.4.0-alpine
@@ -25,7 +56,14 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     ports:
       - "27017:27017"
-
+    networks:
+      - kafka-net
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand(\"ping\").ok' | mongo localhost:27017/test --quiet"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  
   mongo-builder:
     image: mongo:8.0.1-rc0-noble
     volumes:
@@ -33,6 +71,8 @@ services:
     command: >
       mongoimport -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin --host mongo --db ${MONGO_DB} --collection ${MONGO_COLLECTION} --type json --file /app/movies.json --jsonArray
     restart: "no"
+    networks:
+      - kafka-net
 
   postgres:
     image: postgres:17-alpine3.20
@@ -40,6 +80,8 @@ services:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
       - POSTGRES_DB=${PG_NAME}
+    networks:
+      - kafka-net
     ports:
       - "5432:5432"
 
@@ -47,6 +89,8 @@ services:
     image: bitnami/spark:latest
     environment:
       - SPARK_MODE=master
+    networks:
+      - kafka-net
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -58,6 +102,8 @@ services:
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
+    networks:
+      - kafka-net
 
   processor:
     build: ./processor
@@ -71,6 +117,8 @@ services:
       - SPARK_HOST=${SPARK_HOST}
       - SPARK_PORT=${SPARK_PORT}
     restart: always
+    networks:
+      - kafka-net
     ports:
       - "8000:8000"
 
@@ -96,7 +144,10 @@ services:
     depends_on:
       - mongo
       - postgres
+      - kafka
     restart: always
+    networks:
+      - kafka-net
     ports:
       - "${WORKER_PORT}:${WORKER_PORT}"
 
@@ -114,6 +165,8 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
     restart: always
+    networks:
+      - kafka-net
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
 
@@ -127,5 +180,12 @@ services:
     depends_on:
       - gateway
     restart: always
+    networks:
+      - kafka-net
     ports:
       - "${CLIENT_PORT}:${CLIENT_PORT}"
+
+
+networks:
+  kafka-net:
+    driver: bridge
