@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -8,10 +9,16 @@ import (
 )
 
 func KafkaConfig() kafka.ConfigMap {
+	server := os.Getenv("KAFKA_SERVER")
+	topic := os.Getenv("KAFKA_TOPIC")
+	fmt.Printf("Kafka Server: %s\n", server)
+	fmt.Printf("Kafka Topic: %s\n", topic)
+
 	configMap := kafka.ConfigMap{
-		"bootstrap.servers": os.Getenv("KAFKA_SERVER"),
-		"group.id":          "user-info-consumer",
-		"auto.offset.reset": "latest",
+		"bootstrap.servers":  server,
+		"group.id":           "user-info-consumer",
+		"auto.offset.reset":  "latest",
+		"session.timeout.ms": 300000,
 	}
 	return configMap
 }
@@ -23,7 +30,7 @@ func KafKaConsumer(configMap *kafka.ConfigMap) (*kafka.Consumer, error) {
 	}
 
 	topic := os.Getenv("KAFKA_TOPIC")
-	err = consumer.Subscribe(topic, nil)
+	err = consumer.SubscribeTopics([]string{topic}, nil)
 	if err != nil {
 		return nil, err
 	}

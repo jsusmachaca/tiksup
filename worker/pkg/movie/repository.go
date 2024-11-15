@@ -1,27 +1,26 @@
-package repository
+package movie
 
 import (
 	"database/sql"
 	"log"
 
-	"github.com/jsusmachaca/tiksup/pkg/auth/repository"
-	"github.com/jsusmachaca/tiksup/pkg/movie/model"
+	"github.com/jsusmachaca/tiksup/pkg/auth"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type MovieRository struct {
+type MovieRepository struct {
 	DB *sql.DB
 }
 
-func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendation, error) {
-	var recommendation model.MovieRemmendation
+func (movie *MovieRepository) GetPreferences(user_id string) (MovieRemmendation, error) {
+	var recommendation MovieRemmendation
 	recommendation.UserID = user_id
-	recommendation.Preferences = model.Preferences{
-		GenreScore:       []model.GenreScore{},
-		ProtagonistScore: []model.ProtagonistScore{},
-		DirectorScore:    []model.DirectorScore{},
+	recommendation.Preferences = Preferences{
+		GenreScore:       []GenreScore{},
+		ProtagonistScore: []ProtagonistScore{},
+		DirectorScore:    []DirectorScore{},
 	}
-	user := repository.UserRepository{DB: movie.DB}
+	user := &auth.UserRepository{DB: movie.DB}
 
 	preferenceID, err := user.GetPreferenceID(user_id)
 	if err != nil {
@@ -54,7 +53,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendat
 	defer rowsGenre.Close()
 
 	for rowsGenre.Next() {
-		var genre model.GenreScore
+		var genre GenreScore
 		if err := rowsGenre.Scan(
 			&genre.Name,
 			&genre.Score,
@@ -76,7 +75,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendat
 	defer rowsProtagonist.Close()
 
 	for rowsProtagonist.Next() {
-		var protagonist model.ProtagonistScore
+		var protagonist ProtagonistScore
 		if err := rowsProtagonist.Scan(
 			&protagonist.Name,
 			&protagonist.Score,
@@ -98,7 +97,7 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendat
 	defer rowsDirector.Close()
 
 	for rowsDirector.Next() {
-		var director model.DirectorScore
+		var director DirectorScore
 		if err := rowsDirector.Scan(
 			&director.Name,
 			&director.Score,
@@ -111,8 +110,8 @@ func (movie *MovieRository) GetPreferences(user_id string) (model.MovieRemmendat
 	return recommendation, nil
 }
 
-func (movie *MovieRository) GetHistory(user_id string) ([]primitive.ObjectID, error) {
-	var history model.History
+func (movie *MovieRepository) GetHistory(user_id string) ([]primitive.ObjectID, error) {
+	var history History
 	var historyArray []primitive.ObjectID
 
 	queryHistory := `SELECT movie_id FROM history WHERE user_id=$1;`

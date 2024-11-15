@@ -1,22 +1,23 @@
 import express, { json } from 'express'
-import cargarRutas from './routes/Loader.js'
-import { iniciarProductor } from './config/kafka.js'
+import routesLoader from './routes/Loader.js'
+import { initProductor } from './config/kafka.js'
 import cors from 'cors'
 import 'dotenv/config'
 
 const app = express()
-const port = process.env.PORT || 3005
+
+const port = process.env.PORT || 3000
 
 app.use(json())
 app.use(cors())
 
-cargarRutas(app)
+routesLoader(app)
 
 app.get('/', (req, res) => {
-  res.send('¡Hola, mundo!')
+  res.send('¡Hello, world!')
 })
 
 app.listen(port, async () => {
-  console.log(`Servidor Express corriendo en http://localhost:${port}`)
-  await iniciarProductor()
+  console.log(`Express server running on http://localhost:${port}`)
+  await initProductor()
 })

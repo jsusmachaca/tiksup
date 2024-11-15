@@ -17,4 +17,4 @@ services:
       - POSTGRES_PASSWORD=${PG_PASSWORD}
       - POSTGRES_DB=${PG_NAME}
     ports:
-      - "5432:5432"
+      - "5489:5489"

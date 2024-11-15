@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jsusmachaca/tiksup/pkg/auth/validation"
+	"github.com/jsusmachaca/tiksup/pkg/auth"
 )
 
 func CreateToken(id string, username string) (string, error) {
@@ -36,7 +36,7 @@ func ValidateToken(tokenstring string) (jwt.MapClaims, error) {
 	}
 
 	if !token.Valid {
-		return nil, validation.ErrInvalidToken
+		return nil, auth.ErrInvalidToken
 	}
 	claims, _ := token.Claims.(jwt.MapClaims)
 

@@ -1,17 +1,13 @@
-package service
+package movie
 
 import (
 	"io"
 	"net/http"
 	"os"
-
-	"github.com/jsusmachaca/tiksup/pkg/movie/validation"
 )
 
-func ApiService(body io.Reader) error {
+func ApiService(client *http.Client, body io.Reader) error {
 	PROCESSOR_URL := os.Getenv("PROCESSOR_URL")
-
-	client := &http.Client{}
 
 	res, err := client.Post(PROCESSOR_URL+"/recommend", "application/json", body)
 	if err != nil {
@@ -20,7 +16,7 @@ func ApiService(body io.Reader) error {
 	defer res.Body.Close()
 
 	if status := res.StatusCode; status != 200 {
-		return validation.ErrRequest
+		return ErrRequest
 	}
 
 	_, err = io.ReadAll(res.Body)
